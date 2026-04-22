@@ -1,0 +1,6 @@
+data/
+__pycache__/
+db-export/
+AGENTS.md
+continual-learning-index.json
+backend/scripts/

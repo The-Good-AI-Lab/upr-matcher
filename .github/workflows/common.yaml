@@ -1,0 +1,72 @@
+name: Common (prek + docker meta)
+
+on:
+  workflow_call:
+    inputs:
+      image_suffix:
+        required: true
+        type: string
+        description: Image path suffix (e.g. backend, frontend)
+    outputs:
+      tags:
+        description: Newline-separated Docker image tags
+        value: ${{ jobs.meta.outputs.tags }}
+
+jobs:
+  prek:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: j178/prek-action@v1
+        with:
+          extra-args: "--all-files --verbose"
+
+  meta:
+    runs-on: ubuntu-latest
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Docker meta (tags)
+        id: meta
+        env:
+          GITHUB_REPO: ${{ github.repository }}
+          IMAGE_SUFFIX: ${{ inputs.image_suffix }}
+          EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF: ${{ github.ref }}
+          REF_NAME: ${{ github.ref_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -e
+          SHORT_SHA=$(git rev-parse --short=7 HEAD)
+          REPO_LOWER=$(echo "$GITHUB_REPO" | tr '[:upper:]' '[:lower:]')
+          IMAGE="ghcr.io/${REPO_LOWER}/${IMAGE_SUFFIX}"
+          echo "Image base: $IMAGE"
+          if [[ "$EVENT_NAME" == "release" ]]; then
+            echo "tags=${IMAGE}:${RELEASE_TAG}" >> $GITHUB_OUTPUT
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            SANITIZED="${HEAD_REF//\//-}"
+            echo "tags<<EOF" >> $GITHUB_OUTPUT
+            echo "${IMAGE}:${SANITIZED}" >> $GITHUB_OUTPUT
+            echo "${IMAGE}:${SANITIZED}-${SHORT_SHA}" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          elif [[ "$EVENT_NAME" == "push" && "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "tags=${IMAGE}:${REF_NAME}" >> $GITHUB_OUTPUT
+          elif [[ "$EVENT_NAME" == "push" && "$GITHUB_REF" == refs/heads/main ]]; then
+            echo "tags<<EOF" >> $GITHUB_OUTPUT
+            echo "${IMAGE}:main" >> $GITHUB_OUTPUT
+            echo "${IMAGE}:main-${SHORT_SHA}" >> $GITHUB_OUTPUT
+            echo "${IMAGE}:latest" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            SANITIZED="${REF_NAME//\//-}"
+            echo "tags<<EOF" >> $GITHUB_OUTPUT
+            echo "${IMAGE}:${SANITIZED}" >> $GITHUB_OUTPUT
+            echo "${IMAGE}:${SANITIZED}-${SHORT_SHA}" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi

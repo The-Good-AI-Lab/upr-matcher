@@ -1,0 +1,51 @@
+Given text extracted from a document written by an organisation that advises the United Nations (UN), do the following:
+
+1. Recommendation Identification:
+* Extract all recommendations that the author has made.
+
+The recommendations are usually groupped together towards the end of the document.
+
+Only use information directly from the provided documents. Do not generate or infer content that is not explicitly stated.
+
+For each identified recommendation, include the exact text extracted from the source text. Usually the recommendations are made
+in bullet points. Use the whole point for each recommendation.
+
+2. Results Presentation:
+Return the findings as a JSON structure with the following fields:
+* "recommendation": Organisation's recommendation (direct citation from the text)
+* "domain": Domain name
+* "beneficiaries": The beneficiaries to be impacked from the recommendation
+* "theme": The theme of the recommendation
+
+Choose the most appropriate theme from the list:
+['Right to education',
+ 'Health, water, food',
+ 'No discrimination',
+ 'Right to life, survival, and development',
+ 'Children in conflict with the law',
+ 'Protection from violence',
+ 'Making rights real',
+ 'Child labour',
+ 'Environment/Climate',
+ 'Participation/empowerment',
+ 'Human trafficking',
+ 'Other human rights ',
+ 'Protection in armed conflicts',
+ 'Birth registration',
+ 'Human trafficking',
+ 'Birth registration',
+ 'Children in conflict with the law',
+ 'Active citizenship ',
+ 'Sexual education', 'vocational training/job opportunities'].
+
+Return only the list of json objects, without any triple tickes.
+
+For example:
+[
+{
+    "recommendation": "Ratify the Amendments to the Rome Statute of the International Criminal Court on the crime of aggression.",
+    "domain": "Peace, Justice and Strong Institutions",
+    "beneficiaries": "Persons affected by armed conflict",
+    "theme": "International criminal and humanitatian law (including crimes against humanity, was crimes, genocide)"
+}, ...]
+Here is the content of the document:
