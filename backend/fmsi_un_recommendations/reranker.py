@@ -59,6 +59,7 @@ class RecommendationReranker:
         min_k: int = 1,
         max_k: int = 10,
         rel_drop_threshold: float = 0.20,
+        batch_size: int = 16,
         device: torch.device | None = None,
         cross_encoder: CrossEncoder | None = None,
     ) -> None:
@@ -67,6 +68,7 @@ class RecommendationReranker:
         self.min_k = min_k
         self.max_k = max_k
         self.rel_drop_threshold = rel_drop_threshold
+        self.batch_size = batch_size
 
     def rerank(
         self,
@@ -102,7 +104,8 @@ class RecommendationReranker:
         results: list[dict[str, int | float | str]] = []
         for query_index, query in enumerate(queries):
             pairs = [[query, candidate] for candidate in candidates]
-            ce_scores = self.cross_encoder.predict(pairs)
+            with torch.inference_mode():
+                ce_scores = self.cross_encoder.predict(pairs, batch_size=self.batch_size)
 
             idx_sorted = np.argsort(-ce_scores)
             sorted_scores = ce_scores[idx_sorted]
@@ -130,6 +133,31 @@ class RecommendationReranker:
                 )
 
         return results
+
+
+_RERANKER_INSTANCE: RecommendationReranker | None = None
+
+
+def get_reranker(
+    *,
+    ce_model_name: str = "cross-encoder/ms-marco-MiniLM-L6-v2",
+    min_k: int = 1,
+    max_k: int = 10,
+    rel_drop_threshold: float = 0.20,
+    batch_size: int = 16,
+    device: torch.device | None = None,
+) -> RecommendationReranker:
+    global _RERANKER_INSTANCE
+    if _RERANKER_INSTANCE is None:
+        _RERANKER_INSTANCE = RecommendationReranker(
+            ce_model_name=ce_model_name,
+            min_k=min_k,
+            max_k=max_k,
+            rel_drop_threshold=rel_drop_threshold,
+            batch_size=batch_size,
+            device=device,
+        )
+    return _RERANKER_INSTANCE
 
 
 def main() -> None:
@@ -162,7 +190,7 @@ def main() -> None:
         print(f"  Candidate: {result.candidate}\n")
 
 
-__all__ = ["RecommendationReranker", "RerankResult", "dynamic_k_by_drop"]
+__all__ = ["RecommendationReranker", "RerankResult", "dynamic_k_by_drop", "get_reranker"]
 
 
 if __name__ == "__main__":

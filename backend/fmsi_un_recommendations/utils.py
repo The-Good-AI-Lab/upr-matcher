@@ -173,8 +173,9 @@ def read_text_file(path: Path | str) -> str:
     p = Path(path)
     ext = p.suffix.lower()
     if ext == ".pdf":
-        reader: Final = PdfReader(p.open("rb"))
-        return "\n\n".join((page.extract_text() or "") for page in reader.pages)
+        with p.open("rb") as handle:
+            reader: Final = PdfReader(handle)
+            return "\n\n".join((page.extract_text() or "") for page in reader.pages)
     if ext == ".docx":
         doc: Final = Document(p)
         return "\n\n".join(block.strip() for block in _docx_blocks_in_order(doc) if block.strip())

@@ -1,31 +1,17 @@
 from __future__ import annotations
 
 import uuid
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Literal
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.concurrency import run_in_threadpool
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from pydantic import BaseModel, ConfigDict
 
 from .db import DatabaseAdapter, get_database
-from .progress import progress_tracker
-from .recommendation_processing import (
-    extract_fmsi_pdf_recommendations,
-    extract_un_recommendation_rows,
-)
 from .settings import Settings
-from .similarity_search import (
-    Recommendation as FmsiRecommendation,
-)
-from .similarity_search import (
-    embed_fmsi_recommendations,
-    embed_un_recommendations,
-    match_recommendation_vectors,
-)
+from .similarity_search import Recommendation as FmsiRecommendation
 
 UPLOAD_ROOT = Path("data/uploads")
 UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
@@ -43,6 +29,7 @@ class MatchEntry(BaseModel):
     target_index: int
     target_text: str
     target_row: dict[str, Any]
+    feedback: str | None = None
 
 
 class CategoryCount(BaseModel):
@@ -57,6 +44,21 @@ class MatchResponse(BaseModel):
     upr_category_counts: list[CategoryCount]
     fmsi_total_recommendations: int
     fmsi_category_counts: list[CategoryCount]
+
+
+class JobEnqueuedResponse(BaseModel):
+    job_id: str
+
+
+class JobSummary(BaseModel):
+    job_id: str
+    status: Literal["pending", "processing", "completed", "failed", "unknown"]
+    percent: float
+    prediction_id: str | None
+    source_filename: str | None
+    reference_filename: str | None
+    created_at: str | None
+    updated_at: str | None
 
 
 class FeedbackRequest(BaseModel):
@@ -75,6 +77,7 @@ class ProgressStatus(BaseModel):
     status: Literal["pending", "processing", "completed", "failed", "unknown"]
     percent: float
     message: str
+    prediction_id: str | None = None
 
 
 def _get_settings() -> Settings:
@@ -142,88 +145,6 @@ def _summarize_fmsi_categories(
     ]
 
 
-def _build_matches(
-    un_doc: Path,
-    fmsi_pdf: Path,
-    threshold: float,
-    job_id: str | None = None,
-) -> tuple[
-    list[dict[str, Any]],
-    list[dict[str, Any]],
-    list[dict[str, Any]],
-    list[FmsiRecommendation],
-]:
-    def _report(percent: float, message: str) -> None:
-        if job_id:
-            progress_tracker.update(job_id, percent, message)
-
-    def _process_un() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        un_rows = extract_un_recommendation_rows(un_doc)
-        _report(20, "Reading the UPR document")
-        embedded_un = embed_un_recommendations(un_rows)
-        _report(35, "Understanding UPR recommendations")
-        return un_rows, embedded_un
-
-    def _process_fmsi() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        fmsi_recommendations = extract_fmsi_pdf_recommendations(fmsi_pdf)
-        _report(25, "Reading the FMSI document")
-        embedded_fmsi = embed_fmsi_recommendations(fmsi_recommendations)
-        _report(45, "Understanding FMSI recommendations")
-        return fmsi_recommendations, embedded_fmsi
-
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        un_future = executor.submit(_process_un)
-        fmsi_future = executor.submit(_process_fmsi)
-        un_rows, embedded_un = un_future.result()
-        fmsi_recommendations, embedded_fmsi = fmsi_future.result()
-
-    _report(55, "Comparing recommendations")
-    # Step 1: Semantic similarity matching
-    raw_matches = match_recommendation_vectors(embedded_fmsi, embedded_un, threshold=threshold)
-    logger.info("Semantic similarity returned {} matches", len(raw_matches))
-
-    grouped_matches: dict[int, list[dict[str, Any]]] = {}
-    for match in raw_matches:
-        grouped_matches.setdefault(match["source_index"], []).append(match)
-
-    # Step 2: Rerank matches using cross-encoder (lazy import to avoid startup issues)
-    if raw_matches:
-        _report(70, "Prioritizing the best matches")
-        try:
-            from .reranker import RecommendationReranker
-
-            reranker = RecommendationReranker(min_k=1, max_k=10)
-            matches: list[dict[str, Any]] = []
-            for group in grouped_matches.values():
-                fmsi_text = group[0]["source_text"]
-                candidate_texts = [m["target_text"] for m in group]
-                rerank_results = reranker.rerank([fmsi_text], candidate_texts)
-                if not rerank_results:
-                    matches.extend({**match} for match in group)
-                    continue
-
-                logger.info(
-                    "Reranker kept {} matches for source '{}'",
-                    len(rerank_results),
-                    fmsi_text[:80].replace("\n", " "),
-                )
-                for rerank_result in rerank_results:
-                    original_match = group[rerank_result.candidate_index]
-                    match_with_reranker = {
-                        **original_match,
-                        "reranker_score": rerank_result.reranker_score,
-                    }
-                    matches.append(match_with_reranker)
-        except Exception as e:
-            logger.warning("Reranking failed ({}), using semantic similarity matches only", e)
-            matches = [{**match} for match in raw_matches]
-    else:
-        matches = []
-
-    _report(80, "Summarizing the findings")
-    return embedded_un, embedded_fmsi, matches, fmsi_recommendations
-
-
 def create_app(settings: Settings | None = None) -> FastAPI:
     app_settings = settings or _get_settings()
     app = FastAPI(title="FMSI UN Recommendations API", version="0.1.0")
@@ -242,6 +163,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         logger.info(
             "FMSI UN Recommendations API started; POST /matches (fmsi_pdf, un_doc), POST /feedback, GET /health"
         )
+        try:
+            db = get_database(app_settings)
+            recovered = db.fail_stale_jobs(0)
+            if recovered:
+                logger.warning("Marked {} orphaned job(s) as failed on startup", recovered)
+        except Exception:
+            logger.opt(exception=True).warning("Could not recover orphaned jobs on startup")
 
     @app.get("/health")
     def health() -> dict[str, str]:
@@ -250,79 +178,36 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def _get_db_dependency() -> DatabaseAdapter:
         return get_database(app_settings)
 
-    @app.post("/matches", response_model=MatchResponse)
+    @app.post("/matches", response_model=JobEnqueuedResponse)
     async def create_matches(
+        request: Request,
         fmsi_pdf: UploadFile = File(...),
         un_doc: UploadFile = File(...),
         job_id: str | None = Form(default=None),
         db: DatabaseAdapter = Depends(_get_db_dependency),
-    ) -> MatchResponse:
-        logger.info("POST /matches: received uploads (fmsi_pdf={}, un_doc={})", fmsi_pdf.filename, un_doc.filename)
-        tracking_id = job_id or str(uuid.uuid4())
-        progress_tracker.start(tracking_id, "Preparing your documents")
-        fmsi_path = await _persist_upload(fmsi_pdf, "fmsi")
-        un_doc_path = await _persist_upload(un_doc, "un")
-        logger.info("Uploads saved: fmsi={}, un_doc={}", fmsi_path, un_doc_path)
-        progress_tracker.update(tracking_id, 10, "Files received. Getting them ready.")
-
-        embedded_un: list[dict[str, Any]] = []
-        upr_category_counts: list[CategoryCount] = []
-        fmsi_recommendations: list[FmsiRecommendation] = []
-        fmsi_category_counts: list[CategoryCount] = []
-
-        try:
+    ) -> JobEnqueuedResponse:
+        async def _enqueue_job() -> JobEnqueuedResponse:
+            tracking_id = job_id or str(uuid.uuid4())
+            user_email: str | None = request.headers.get("X-Auth-Request-Email")
             logger.info(
-                "Starting match pipeline: extract → embed → match (threshold={})",
-                app_settings.match_threshold,
+                "POST /matches: queuing job {} for user={} (fmsi_pdf={}, un_doc={})",
+                tracking_id,
+                user_email,
+                fmsi_pdf.filename,
+                un_doc.filename,
             )
-            embedded_un, embedded_fmsi, matches, fmsi_recommendations = await run_in_threadpool(
-                _build_matches, un_doc_path, fmsi_path, app_settings.match_threshold, tracking_id
+            fmsi_path = await _persist_upload(fmsi_pdf, "fmsi")
+            un_doc_path = await _persist_upload(un_doc, "un")
+            db.create_job(
+                job_id=tracking_id,
+                user_email=user_email,
+                source_path=str(fmsi_path),
+                reference_path=str(un_doc_path),
             )
-            plain_upr_rows = [{k: v for k, v in row.items() if k != "embedding"} for row in embedded_un]
-            upr_category_counts = _summarize_upr_categories(plain_upr_rows)
-            fmsi_category_counts = _summarize_fmsi_categories(fmsi_recommendations)
-            progress_tracker.update(tracking_id, 85, "Finishing up the results")
-            logger.info(
-                "Match pipeline done: {} matches (threshold={})",
-                len(matches),
-                app_settings.match_threshold,
-            )
-            for match in matches:
-                match.setdefault("match_id", str(uuid.uuid4()))
-        except (FileNotFoundError, ValueError) as exc:
-            progress_tracker.fail(tracking_id, str(exc))
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
-        except Exception as exc:  # pragma: no cover
-            logger.opt(exception=True).error("Failed to process documents")
-            progress_tracker.fail(tracking_id, "We couldn't finish analyzing the documents")
-            raise HTTPException(status_code=500, detail=f"Failed to process documents: {exc}") from exc
+            logger.info("Job {} enqueued", tracking_id)
+            return JobEnqueuedResponse(job_id=tracking_id)
 
-        def _save_and_build_response() -> tuple[str, list[MatchEntry]]:
-            prediction_id = db.save_prediction(
-                input_un_path=str(un_doc_path),
-                input_fmsi_path=str(fmsi_path),
-                un_rows=embedded_un,
-                fmsi_rows=embedded_fmsi,
-                matches=matches,
-            )
-            return prediction_id, [MatchEntry(**m) for m in matches]
-
-        try:
-            progress_tracker.update(tracking_id, 92, "Saving your results")
-            prediction_id, match_entries = await run_in_threadpool(_save_and_build_response)
-        except Exception as exc:  # pragma: no cover
-            progress_tracker.fail(tracking_id, "We couldn't save the results")
-            raise HTTPException(status_code=500, detail="Failed to save prediction") from exc
-        progress_tracker.complete(tracking_id, "Analysis complete")
-        logger.info("Prediction saved: id={}, returning {} matches", prediction_id, len(match_entries))
-        return MatchResponse(
-            prediction_id=prediction_id,
-            matches=match_entries,
-            upr_total_recommendations=len(embedded_un),
-            upr_category_counts=upr_category_counts,
-            fmsi_total_recommendations=len(fmsi_recommendations),
-            fmsi_category_counts=fmsi_category_counts,
-        )
+        return await _enqueue_job()
 
     @app.post("/feedback", response_model=FeedbackResponse)
     def create_feedback(
@@ -346,20 +231,105 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return FeedbackResponse(feedback_id=feedback_id)
 
     @app.get("/progress/{job_id}", response_model=ProgressStatus)
-    def get_progress(job_id: str) -> ProgressStatus:
-        status = progress_tracker.get(job_id)
-        if status is None:
+    def get_progress(
+        job_id: str,
+        db: DatabaseAdapter = Depends(_get_db_dependency),
+    ) -> ProgressStatus:
+        job = db.get_job(job_id)
+        if job is None:
             return ProgressStatus(
                 job_id=job_id,
-                status="pending",
+                status="unknown",
                 percent=0.0,
-                message="Waiting for analysis to start",
+                message="Job not found",
             )
         return ProgressStatus(
             job_id=job_id,
-            status=status["status"],
-            percent=status["percent"],
-            message=status["message"],
+            status=job.status,  # type: ignore[arg-type]
+            percent=job.percent,
+            message=job.message,
+            prediction_id=job.prediction_id,
+        )
+
+    @app.post("/jobs/{job_id}/cancel", status_code=204)
+    def cancel_job(
+        job_id: str,
+        request: Request,
+        db: DatabaseAdapter = Depends(_get_db_dependency),
+    ) -> None:
+        user_email: str | None = request.headers.get("X-Auth-Request-Email")
+        job = db.get_job(job_id)
+        if job is None:
+            raise HTTPException(status_code=404, detail="Job not found")
+        if job.user_email != user_email:
+            raise HTTPException(status_code=403, detail="Not your job")
+        if job.status in ("completed", "failed"):
+            raise HTTPException(status_code=409, detail="Job already finished")
+        db.cancel_job(job_id)
+
+    @app.delete("/jobs/{job_id}", status_code=204)
+    def delete_job(
+        job_id: str,
+        request: Request,
+        db: DatabaseAdapter = Depends(_get_db_dependency),
+    ) -> None:
+        user_email: str | None = request.headers.get("X-Auth-Request-Email")
+        job = db.get_job(job_id)
+        if job is None:
+            raise HTTPException(status_code=404, detail="Job not found")
+        if job.user_email != user_email:
+            raise HTTPException(status_code=403, detail="Not your job")
+        db.delete_job(job_id)
+
+    @app.get("/jobs", response_model=list[JobSummary])
+    def list_jobs(
+        request: Request,
+        db: DatabaseAdapter = Depends(_get_db_dependency),
+    ) -> list[JobSummary]:
+        user_email: str | None = request.headers.get("X-Auth-Request-Email")
+        jobs = db.list_jobs_for_user(user_email)
+        return [
+            JobSummary(
+                job_id=job.id,
+                status=job.status,  # type: ignore[arg-type]
+                percent=job.percent,
+                prediction_id=job.prediction_id,
+                source_filename=Path(job.source_path).name if job.source_path else None,
+                reference_filename=Path(job.reference_path).name if job.reference_path else None,
+                created_at=job.created_at,
+                updated_at=job.updated_at,
+            )
+            for job in jobs
+        ]
+
+    @app.get("/predictions/{prediction_id}", response_model=MatchResponse)
+    def get_prediction(
+        prediction_id: str,
+        db: DatabaseAdapter = Depends(_get_db_dependency),
+    ) -> MatchResponse:
+        prediction = db.get_prediction(prediction_id)
+        if prediction is None:
+            raise HTTPException(status_code=404, detail="Prediction not found")
+
+        feedback_records = db.list_feedback(prediction_id)
+        # keep only the latest feedback per match (list is ordered DESC by created_at)
+        feedback_by_match: dict[str, str] = {}
+        for fb in reversed(feedback_records):
+            feedback_by_match[fb.match_id] = "correct" if fb.thumb_up else "incorrect"
+
+        upr_category_counts = _summarize_upr_categories(prediction.un_rows)
+        fmsi_category_counts = _summarize_fmsi_categories(prediction.fmsi_rows)
+        match_entries = [
+            MatchEntry(**m, feedback=feedback_by_match.get(m.get("match_id", ""))) for m in prediction.matches
+        ]
+
+        return MatchResponse(
+            prediction_id=prediction_id,
+            matches=match_entries,
+            upr_total_recommendations=len(prediction.un_rows),
+            upr_category_counts=upr_category_counts,
+            fmsi_total_recommendations=len(prediction.fmsi_rows),
+            fmsi_category_counts=fmsi_category_counts,
         )
 
     return app

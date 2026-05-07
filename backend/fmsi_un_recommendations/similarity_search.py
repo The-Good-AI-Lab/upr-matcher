@@ -43,10 +43,9 @@ def embed_un_recommendations(rows: list[dict[str, str]]) -> list[dict[str, Any]]
     logger.info("Embedding {} UN rows", len(rows))
     embedder = get_text_embedder()
     payloads = [_row_to_text_payload(row) for row in rows]
-    raw_embeddings = list(embedder.embed(payloads))
 
     enriched_rows: list[dict[str, Any]] = []
-    for row, embedding in zip(rows, raw_embeddings, strict=False):
+    for row, embedding in zip(rows, embedder.embed(payloads), strict=False):
         enriched_row = dict(row)
         enriched_row["embedding"] = _embedding_to_list(embedding)
         enriched_rows.append(enriched_row)
@@ -64,10 +63,9 @@ def embed_fmsi_recommendations(
     logger.info("Embedding {} FMSI recommendations", len(recommendations))
     embedder = get_text_embedder()
     payloads = [rec.recommendation for rec in recommendations]
-    embeddings = list(embedder.embed(payloads))
 
     enriched_rows: list[dict[str, Any]] = []
-    for rec, embedding in zip(recommendations, embeddings, strict=False):
+    for rec, embedding in zip(recommendations, embedder.embed(payloads), strict=False):
         enriched_rows.append(
             {
                 "recommendation": rec.recommendation,

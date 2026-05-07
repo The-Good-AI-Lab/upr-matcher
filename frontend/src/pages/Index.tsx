@@ -1,19 +1,23 @@
 import {
+	AlertCircle,
+	Clock,
 	FileText,
 	ListChecks,
 	Loader2,
 	Play,
+	RefreshCw,
 	Save,
 	Sparkles,
 } from "lucide-react";
 import mammoth from "mammoth";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import logo from "@/assets/logo.svg";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { DocumentViewer } from "@/components/DocumentViewer";
 import { DownloadButton } from "@/components/DownloadButton";
 import { PdfViewer } from "@/components/PdfViewer";
+import { PreviousRuns } from "@/components/PreviousRuns";
 import {
 	type Recommendation,
 	RecommendationsTable,
@@ -25,7 +29,9 @@ import { Progress } from "@/components/ui/progress";
 import {
 	analyzeDocuments,
 	type FmsiSummary,
+	fetchPrediction,
 	fetchProgress,
+	type JobSummary,
 	submitFeedback,
 	type UprSummary,
 } from "@/lib/api";
@@ -38,6 +44,38 @@ interface UploadedFileDisplay {
 	pdfUrl?: string;
 	isDocx?: boolean;
 	docxArrayBuffer?: ArrayBuffer;
+}
+
+const STORAGE_KEY = "urp_matcher_session";
+
+interface PersistedSession {
+	jobId?: string;
+	predictionId?: string;
+}
+
+function saveSession(session: PersistedSession) {
+	try {
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+	} catch {
+		// storage quota exceeded or private browsing — ignore
+	}
+}
+
+function clearSession() {
+	try {
+		localStorage.removeItem(STORAGE_KEY);
+	} catch {
+		// ignore
+	}
+}
+
+function loadSession(): PersistedSession | null {
+	try {
+		const raw = localStorage.getItem(STORAGE_KEY);
+		return raw ? (JSON.parse(raw) as PersistedSession) : null;
+	} catch {
+		return null;
+	}
 }
 
 const Index = () => {
@@ -56,18 +94,45 @@ const Index = () => {
 	const [progressMessage, setProgressMessage] = useState(
 		"Preparing analysis...",
 	);
+	const [jobStatus, setJobStatus] = useState<
+		"idle" | "pending" | "processing" | "failed"
+	>("idle");
+	const [failureMessage, setFailureMessage] = useState<string | null>(null);
 	const rawFile1Ref = useRef<File | null>(null);
 	const rawFile2Ref = useRef<File | null>(null);
 	const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
 		null,
 	);
+	const activeJobFilesRef = useRef<{ ref: File; src: File } | null>(null);
+	const pollErrorCountRef = useRef(0);
 
-	const stopProgressPolling = () => {
+	const stopProgressPolling = useCallback(() => {
 		if (progressIntervalRef.current) {
 			clearInterval(progressIntervalRef.current);
 			progressIntervalRef.current = null;
 		}
-	};
+	}, []);
+
+	const resetAnalysisState = useCallback(
+		({
+			status,
+			message,
+			failure,
+		}: {
+			status: "idle" | "failed";
+			message: string;
+			failure?: string | null;
+		}) => {
+			stopProgressPolling();
+			setJobStatus(status);
+			setProgressMessage(message);
+			setFailureMessage(failure ?? null);
+			setAnalysisProgress(0);
+			setIsAnalyzing(false);
+			clearSession();
+		},
+		[stopProgressPolling],
+	);
 
 	useEffect(() => {
 		return () => {
@@ -77,28 +142,117 @@ const Index = () => {
 		};
 	}, []);
 
-	const pollProgress = async (jobId: string) => {
-		try {
-			const status = await fetchProgress(jobId);
-			setAnalysisProgress(status.percent);
-			setProgressMessage(status.message);
-			if (status.status === "completed" || status.status === "failed") {
-				stopProgressPolling();
+	const pollProgress = useCallback(
+		async (jobId: string) => {
+			try {
+				const status = await fetchProgress(jobId);
+				pollErrorCountRef.current = 0;
+				setJobStatus(
+					status.status === "pending" || status.status === "processing"
+						? status.status
+						: status.status === "failed"
+							? "failed"
+							: "idle",
+				);
+				setAnalysisProgress(status.percent);
+				setProgressMessage(status.message);
+				if (status.status === "completed") {
+					stopProgressPolling();
+					if (status.predictionId) {
+						try {
+							const files = activeJobFilesRef.current;
+							const session = await fetchPrediction(
+								status.predictionId,
+								files?.ref.name,
+								files?.src.name,
+							);
+							setSessionId(session.id);
+							setRecommendations(session.recommendations);
+							setUprSummary(session.uprSummary);
+							setFmsiSummary(session.fmsiSummary);
+							setAnalysisProgress(100);
+							setProgressMessage("Analysis complete");
+							setJobStatus("idle");
+							saveSession({ predictionId: session.id });
+							toast.success(
+								`Analysis complete! Found ${session.recommendations.length} recommendation matches.`,
+							);
+						} catch (err) {
+							console.error("Failed to load results:", err);
+							toast.error("Analysis finished but failed to load results");
+						}
+					}
+					setIsAnalyzing(false);
+				} else if (status.status === "failed") {
+					resetAnalysisState({
+						status: "failed",
+						message: status.message || "Analysis failed",
+						failure: status.message || "Analysis failed",
+					});
+				} else if (status.status === "unknown") {
+					resetAnalysisState({
+						status: "idle",
+						message: "No active analysis found",
+					});
+					toast.warning(
+						"Previous queued run was not found. You can start a new analysis.",
+					);
+				}
+			} catch (error) {
+				console.error("Progress poll error:", error);
+				pollErrorCountRef.current += 1;
+				if (pollErrorCountRef.current >= 5) {
+					stopProgressPolling();
+					setFailureMessage(
+						"Lost connection to the server. The job may still be running — check Previous Runs later.",
+					);
+					setJobStatus("failed");
+					setIsAnalyzing(false);
+					clearSession();
+				}
 			}
-		} catch (error) {
-			console.error("Progress poll error:", error);
-		}
-	};
+		},
+		[resetAnalysisState, stopProgressPolling],
+	);
 
-	const startProgressPolling = (jobId: string) => {
-		stopProgressPolling();
-		setProgressMessage("Starting analysis...");
-		setAnalysisProgress(0);
-		pollProgress(jobId);
-		progressIntervalRef.current = setInterval(() => {
+	const startProgressPolling = useCallback(
+		(jobId: string) => {
+			stopProgressPolling();
+			pollErrorCountRef.current = 0;
+			setJobStatus("pending");
+			setFailureMessage(null);
+			setProgressMessage("Waiting in queue...");
+			setAnalysisProgress(0);
 			pollProgress(jobId);
-		}, 1000);
-	};
+			progressIntervalRef.current = setInterval(() => {
+				pollProgress(jobId);
+			}, 1000);
+		},
+		[pollProgress, stopProgressPolling],
+	);
+
+	// Restore previous session on mount — placed after polling functions are declared
+	useEffect(() => {
+		const session = loadSession();
+		if (!session) return;
+
+		if (session.predictionId) {
+			fetchPrediction(session.predictionId)
+				.then((s) => {
+					setSessionId(s.id);
+					setRecommendations(s.recommendations);
+					setUprSummary(s.uprSummary);
+					setFmsiSummary(s.fmsiSummary);
+					toast.info("Previous results restored.");
+				})
+				.catch(() => {
+					clearSession();
+				});
+		} else if (session.jobId) {
+			setIsAnalyzing(true);
+			startProgressPolling(session.jobId);
+		}
+	}, [startProgressPolling]);
 
 	const progressStages = [
 		{ threshold: 5, label: "Preparing", icon: FileText },
@@ -118,32 +272,31 @@ const Index = () => {
 		const jobId =
 			globalThis.crypto?.randomUUID?.() ??
 			`${Date.now()}-${Math.random().toString(16).slice(2)}`;
+		clearSession();
 		setIsAnalyzing(true);
-		startProgressPolling(jobId);
+		setProgressMessage("Submitting job...");
+		setAnalysisProgress(0);
+		setRecommendations([]);
+		setUprSummary(null);
+		setFmsiSummary(null);
+		setSessionId(null);
+		activeJobFilesRef.current = {
+			ref: rawFile1Ref.current,
+			src: rawFile2Ref.current,
+		};
 		toast.info("Analyzing documents... This may take a moment.");
 
 		try {
-			const session = await analyzeDocuments(
-				rawFile1Ref.current,
-				rawFile2Ref.current,
-				jobId,
-			);
-			setSessionId(session.id);
-			setRecommendations(session.recommendations);
-			setUprSummary(session.uprSummary);
-			setFmsiSummary(session.fmsiSummary);
-			setAnalysisProgress(100);
-			setProgressMessage("Analysis complete");
-			toast.success(
-				`Analysis complete! Found ${session.recommendations.length} recommendation matches.`,
-			);
+			await analyzeDocuments(rawFile1Ref.current, rawFile2Ref.current, jobId);
+			saveSession({ jobId });
+			startProgressPolling(jobId);
 		} catch (error) {
 			console.error("Analysis error:", error);
-			toast.error(error instanceof Error ? error.message : "Analysis failed");
-			setProgressMessage("Analysis failed");
+			const msg = error instanceof Error ? error.message : "Analysis failed";
+			setFailureMessage(msg);
+			setJobStatus("failed");
+			setProgressMessage(msg);
 			setAnalysisProgress(0);
-		} finally {
-			stopProgressPolling();
 			setIsAnalyzing(false);
 		}
 	};
@@ -252,6 +405,23 @@ const Index = () => {
 		setSessionId(null);
 	};
 
+	const handleLoadRun = async (job: JobSummary) => {
+		if (!job.predictionId) return;
+		try {
+			const session = await fetchPrediction(job.predictionId);
+			setSessionId(session.id);
+			setRecommendations(session.recommendations);
+			setUprSummary(session.uprSummary);
+			setFmsiSummary(session.fmsiSummary);
+			saveSession({ predictionId: session.id });
+			toast.success(
+				`Loaded run with ${session.recommendations.length} matches.`,
+			);
+		} catch {
+			toast.error("Failed to load that run");
+		}
+	};
+
 	return (
 		<div className="min-h-screen bg-background">
 			{/* Header */}
@@ -266,6 +436,9 @@ const Index = () => {
 							<p className="text-sm text-muted-foreground">
 								Recommendation Analysis
 							</p>
+						</div>
+						<div className="ml-auto">
+							<PreviousRuns onLoadRun={handleLoadRun} />
 						</div>
 					</div>
 				</div>
@@ -367,54 +540,98 @@ const Index = () => {
 					</Button>
 				</div>
 
-				{(isAnalyzing || analysisProgress > 0) && (
-					<Card
-						className={`mb-6 p-4 bg-card/60 border-primary/20 ${
-							isAnalyzing ? "animate-pulse" : ""
-						}`}
-					>
-						<div className="flex items-center justify-between mb-2">
-							<div>
-								<p className="text-sm font-semibold text-foreground">
-									Analyzing documents
+				{jobStatus === "failed" && failureMessage && (
+					<Card className="mb-6 p-4 bg-destructive/10 border-destructive/30">
+						<div className="flex items-start gap-3">
+							<AlertCircle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+							<div className="flex-1 min-w-0">
+								<p className="text-sm font-semibold text-destructive">
+									Analysis failed
 								</p>
-								<p className="text-xs text-muted-foreground">
-									{progressMessage}
+								<p className="text-xs text-muted-foreground mt-0.5 break-words">
+									{failureMessage}
 								</p>
 							</div>
-							<span className="text-sm font-semibold text-foreground">
-								{Math.round(analysisProgress)}%
-							</span>
+							<Button
+								variant="outline"
+								size="sm"
+								className="shrink-0 border-destructive/40 text-destructive hover:bg-destructive/10"
+								onClick={handleAnalyze}
+							>
+								<RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+								Retry
+							</Button>
 						</div>
-						<div className="flex flex-wrap gap-3 mb-3">
-							{progressStages.map((stage) => {
-								const Icon = stage.icon;
-								const isActive = analysisProgress >= stage.threshold;
-								return (
-									<div
-										key={stage.label}
-										className={`flex items-center gap-1 text-xs rounded-full px-2 py-1 transition-all duration-300 ${
-											isActive
-												? "bg-primary/10 text-primary"
-												: "text-muted-foreground"
-										}`}
-									>
-										<Icon
-											className={`h-4 w-4 ${
-												isActive && isAnalyzing ? "animate-bounce" : ""
-											}`}
-										/>
-										<span>{stage.label}</span>
-									</div>
-								);
-							})}
-						</div>
-						<Progress
-							value={analysisProgress}
-							className="transition-all duration-500 ease-out"
-						/>
 					</Card>
 				)}
+
+				{jobStatus === "pending" && isAnalyzing && (
+					<Card className="mb-6 p-4 bg-muted/40 border-muted-foreground/20">
+						<div className="flex items-center gap-3">
+							<Clock className="h-5 w-5 text-muted-foreground animate-pulse shrink-0" />
+							<div className="flex-1">
+								<p className="text-sm font-semibold text-foreground">
+									Waiting in queue
+								</p>
+								<p className="text-xs text-muted-foreground">
+									Your job is queued and will start shortly.
+								</p>
+							</div>
+							<Loader2 className="h-4 w-4 text-muted-foreground animate-spin shrink-0" />
+						</div>
+					</Card>
+				)}
+
+				{(isAnalyzing || analysisProgress > 0) &&
+					jobStatus !== "pending" &&
+					jobStatus !== "failed" && (
+						<Card
+							className={`mb-6 p-4 bg-card/60 border-primary/20 ${
+								isAnalyzing ? "animate-pulse" : ""
+							}`}
+						>
+							<div className="flex items-center justify-between mb-2">
+								<div>
+									<p className="text-sm font-semibold text-foreground">
+										Analyzing documents
+									</p>
+									<p className="text-xs text-muted-foreground">
+										{progressMessage}
+									</p>
+								</div>
+								<span className="text-sm font-semibold text-foreground">
+									{Math.round(analysisProgress)}%
+								</span>
+							</div>
+							<div className="flex flex-wrap gap-3 mb-3">
+								{progressStages.map((stage) => {
+									const Icon = stage.icon;
+									const isActive = analysisProgress >= stage.threshold;
+									return (
+										<div
+											key={stage.label}
+											className={`flex items-center gap-1 text-xs rounded-full px-2 py-1 transition-all duration-300 ${
+												isActive
+													? "bg-primary/10 text-primary"
+													: "text-muted-foreground"
+											}`}
+										>
+											<Icon
+												className={`h-4 w-4 ${
+													isActive && isAnalyzing ? "animate-bounce" : ""
+												}`}
+											/>
+											<span>{stage.label}</span>
+										</div>
+									);
+								})}
+							</div>
+							<Progress
+								value={analysisProgress}
+								className="transition-all duration-500 ease-out"
+							/>
+						</Card>
+					)}
 
 				{/* Table and Summary - Full Width Below */}
 				<div className="space-y-6">

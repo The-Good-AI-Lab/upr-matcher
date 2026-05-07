@@ -24,6 +24,7 @@ dependencies = [
 
 [project.scripts]
 app = "fmsi_un_recommendations:main"
+worker = "fmsi_un_recommendations:worker_main"
 
 [build-system]
 requires = ["hatchling"]

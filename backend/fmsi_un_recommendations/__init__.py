@@ -6,6 +6,7 @@ import uvicorn
 from loguru import logger
 
 from .api import create_app
+from .worker import run_worker
 
 logger.remove()
 logger.add(
@@ -18,3 +19,7 @@ logger.add(
 def main() -> None:
     app = create_app()
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+def worker_main() -> None:
+    run_worker()

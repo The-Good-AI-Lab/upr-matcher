@@ -53,6 +53,18 @@ export interface ProgressResponse {
 	status: "pending" | "processing" | "completed" | "failed" | "unknown";
 	percent: number;
 	message: string;
+	predictionId?: string;
+}
+
+export interface JobSummary {
+	jobId: string;
+	status: "pending" | "processing" | "completed" | "failed" | "unknown";
+	percent: number;
+	predictionId: string | null;
+	sourceFilename: string | null;
+	referenceFilename: string | null;
+	createdAt: string | null;
+	updatedAt: string | null;
 }
 
 export interface AnalysisSessionResponse {
@@ -75,6 +87,7 @@ interface BackendMatchEntry {
 	target_index: number;
 	target_text: string;
 	target_row: Record<string, unknown>;
+	feedback?: string | null;
 }
 
 interface BackendMatchResponse {
@@ -137,7 +150,10 @@ function mapMatchToRecommendation(
 			domain,
 		},
 		score: Math.round(match.score * 100),
-		feedback: null,
+		feedback:
+			match.feedback === "correct" || match.feedback === "incorrect"
+				? match.feedback
+				: null,
 	};
 }
 
@@ -156,7 +172,7 @@ export async function analyzeDocuments(
 	referenceFile: File,
 	sourceFile: File,
 	jobId?: string,
-): Promise<AnalysisSessionResponse> {
+): Promise<{ jobId: string }> {
 	const docxFile = isDocx(referenceFile)
 		? referenceFile
 		: isDocx(sourceFile)
@@ -190,6 +206,20 @@ export async function analyzeDocuments(
 		throw new Error((error as { detail?: string }).detail || "Analysis failed");
 	}
 
+	const data = (await res.json()) as { job_id: string };
+	return { jobId: data.job_id };
+}
+
+export async function fetchPrediction(
+	predictionId: string,
+	referenceFilename?: string,
+	sourceFilename?: string,
+): Promise<AnalysisSessionResponse> {
+	const base = `${API_BASE}${API_PREFIX}`.replace(/\/$/, "");
+	const res = await fetch(`${base}/predictions/${predictionId}`);
+	if (!res.ok) {
+		throw new Error("Failed to fetch prediction results");
+	}
 	const data = (await res.json()) as BackendMatchResponse;
 	const recommendations = data.matches.map((m) =>
 		mapMatchToRecommendation(m, data.prediction_id),
@@ -197,8 +227,8 @@ export async function analyzeDocuments(
 	return {
 		id: data.prediction_id,
 		created_at: new Date().toISOString(),
-		reference_filename: referenceFile.name,
-		source_filename: sourceFile.name,
+		reference_filename: referenceFilename ?? null,
+		source_filename: sourceFilename ?? null,
 		status: "completed",
 		recommendations,
 		uprSummary: {
@@ -243,6 +273,52 @@ export async function submitFeedback(
 	return { id: data.feedback_id };
 }
 
+export async function fetchUserJobs(): Promise<JobSummary[]> {
+	const base = `${API_BASE}${API_PREFIX}`.replace(/\/$/, "");
+	const res = await fetch(`${base}/jobs`);
+	if (!res.ok) {
+		throw new Error("Failed to fetch previous runs");
+	}
+	const data = (await res.json()) as Array<{
+		job_id: string;
+		status: JobSummary["status"];
+		percent: number;
+		prediction_id: string | null;
+		source_filename: string | null;
+		reference_filename: string | null;
+		created_at: string | null;
+		updated_at: string | null;
+	}>;
+	return data.map((j) => ({
+		jobId: j.job_id,
+		status: j.status,
+		percent: j.percent,
+		predictionId: j.prediction_id,
+		sourceFilename: j.source_filename,
+		referenceFilename: j.reference_filename,
+		createdAt: j.created_at,
+		updatedAt: j.updated_at,
+	}));
+}
+
+export async function cancelJob(jobId: string): Promise<void> {
+	const base = `${API_BASE}${API_PREFIX}`.replace(/\/$/, "");
+	const res = await fetch(`${base}/jobs/${jobId}/cancel`, { method: "POST" });
+	if (!res.ok) {
+		const err = await res.json().catch(() => ({ detail: "Failed to cancel" }));
+		throw new Error((err as { detail?: string }).detail || "Failed to cancel");
+	}
+}
+
+export async function deleteJob(jobId: string): Promise<void> {
+	const base = `${API_BASE}${API_PREFIX}`.replace(/\/$/, "");
+	const res = await fetch(`${base}/jobs/${jobId}`, { method: "DELETE" });
+	if (!res.ok) {
+		const err = await res.json().catch(() => ({ detail: "Failed to delete" }));
+		throw new Error((err as { detail?: string }).detail || "Failed to delete");
+	}
+}
+
 export async function fetchProgress(jobId: string): Promise<ProgressResponse> {
 	const base = `${API_BASE}${API_PREFIX}`.replace(/\/$/, "");
 	const res = await fetch(`${base}/progress/${jobId}`);
@@ -254,11 +330,13 @@ export async function fetchProgress(jobId: string): Promise<ProgressResponse> {
 		status: ProgressResponse["status"];
 		percent: number;
 		message: string;
+		prediction_id?: string;
 	};
 	return {
 		jobId: data.job_id,
 		status: data.status,
 		percent: data.percent,
 		message: data.message,
+		predictionId: data.prediction_id,
 	};
 }
