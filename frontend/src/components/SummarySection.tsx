@@ -1,4 +1,12 @@
-import { Tag, ThumbsDown, ThumbsUp, TrendingUp } from "lucide-react";
+import {
+	Bookmark,
+	CheckCircle2,
+	MessageSquare,
+	Tag,
+	ThumbsDown,
+	ThumbsUp,
+	TrendingUp,
+} from "lucide-react";
 import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import type { FmsiSummary, UprSummary } from "@/lib/api";
@@ -23,6 +31,29 @@ const CATEGORY_COLORS = [
 
 const getCategoryColor = (index: number) =>
 	CATEGORY_COLORS[index % CATEGORY_COLORS.length];
+
+type StatCardProps = {
+	label: string;
+	value: string | number;
+	icon: React.ReactNode;
+	accent: string;
+	sub?: string;
+};
+
+const StatCard = ({ label, value, icon, accent, sub }: StatCardProps) => (
+	<div
+		className={`rounded-xl border bg-card p-5 shadow-sm flex flex-col gap-3 ${accent}`}
+	>
+		<div className="flex items-center justify-between">
+			<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+				{label}
+			</p>
+			{icon}
+		</div>
+		<p className="text-3xl font-bold text-foreground leading-none">{value}</p>
+		{sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+	</div>
+);
 
 export const SummarySection = ({
 	recommendations,
@@ -73,12 +104,12 @@ export const SummarySection = ({
 			const categoryName = rec.source.theme || rec.category || "Uncategorized";
 			counts.set(categoryName, (counts.get(categoryName) ?? 0) + 1);
 		});
-
 		return Array.from(counts.entries()).map(([name, count]) => ({
 			name,
 			count,
 		}));
 	}, [distinctSourceRecommendations]);
+
 	const totalFmsiRecommendations =
 		fmsiSummary?.totalRecommendations ?? totalDistinctSourceRecommendations;
 
@@ -87,14 +118,10 @@ export const SummarySection = ({
 			fmsiSummary?.categories && fmsiSummary.categories.length > 0
 				? fmsiSummary.categories
 				: fallbackFmsiCategoryData;
-
 		return baseCategories
-			.map((category) => ({ name: category.name, count: category.count }))
+			.map((c) => ({ name: c.name, count: c.count }))
 			.sort((a, b) => b.count - a.count)
-			.map((category, index) => ({
-				...category,
-				color: getCategoryColor(index),
-			}));
+			.map((c, i) => ({ ...c, color: getCategoryColor(i) }));
 	}, [fmsiSummary, fallbackFmsiCategoryData]);
 
 	const fallbackUprCategoryData = useMemo(() => {
@@ -103,7 +130,6 @@ export const SummarySection = ({
 			const categoryName = rec.reference.theme || "Uncategorized";
 			counts.set(categoryName, (counts.get(categoryName) ?? 0) + 1);
 		});
-
 		return Array.from(counts.entries()).map(([name, count]) => ({
 			name,
 			count,
@@ -118,14 +144,10 @@ export const SummarySection = ({
 			uprSummary?.categories && uprSummary.categories.length > 0
 				? uprSummary.categories
 				: fallbackUprCategoryData;
-
 		return baseCategories
-			.map((category) => ({ name: category.name, count: category.count }))
+			.map((c) => ({ name: c.name, count: c.count }))
 			.sort((a, b) => b.count - a.count)
-			.map((category, index) => ({
-				...category,
-				color: getCategoryColor(index + 4),
-			}));
+			.map((c, i) => ({ ...c, color: getCategoryColor(i + 4) }));
 	}, [uprSummary, fallbackUprCategoryData]);
 
 	const totalFmsiThemes = fmsiSummaryCategories.length;
@@ -138,14 +160,9 @@ export const SummarySection = ({
 				rec.source.theme?.trim() || rec.category?.trim() || "Uncategorized";
 			counts.set(name, (counts.get(name) ?? 0) + 1);
 		});
-
 		return Array.from(counts.entries())
 			.sort((a, b) => b[1] - a[1])
-			.map(([name, count], index) => ({
-				name,
-				count,
-				color: getCategoryColor(index),
-			}));
+			.map(([name, count], i) => ({ name, count, color: getCategoryColor(i) }));
 	}, [recommendations]);
 
 	const uprMatchCategories = useMemo(() => {
@@ -157,24 +174,20 @@ export const SummarySection = ({
 				"Uncategorized";
 			counts.set(name, (counts.get(name) ?? 0) + 1);
 		});
-
 		return Array.from(counts.entries())
 			.sort((a, b) => b[1] - a[1])
-			.map(([name, count], index) => ({
+			.map(([name, count], i) => ({
 				name,
 				count,
-				color: getCategoryColor(index + 4),
+				color: getCategoryColor(i + 4),
 			}));
 	}, [recommendations]);
 
 	const { supportedMatches, notedMatches } = useMemo(() => {
 		return recommendations.reduce(
 			(acc, rec) => {
-				if (rec.status === "supported") {
-					acc.supportedMatches += 1;
-				} else if (rec.status === "noted") {
-					acc.notedMatches += 1;
-				}
+				if (rec.status === "supported") acc.supportedMatches += 1;
+				else if (rec.status === "noted") acc.notedMatches += 1;
 				return acc;
 			},
 			{ supportedMatches: 0, notedMatches: 0 },
@@ -184,16 +197,14 @@ export const SummarySection = ({
 	const feedbackBreakdown = useMemo(() => {
 		return recommendations.reduce(
 			(acc, rec) => {
-				if (rec.status === "supported" && rec.feedback === "correct") {
+				if (rec.status === "supported" && rec.feedback === "correct")
 					acc.supportedPositive += 1;
-				} else if (rec.status === "supported" && rec.feedback === "incorrect") {
+				else if (rec.status === "supported" && rec.feedback === "incorrect")
 					acc.supportedNegative += 1;
-				} else if (rec.status === "noted" && rec.feedback === "correct") {
+				else if (rec.status === "noted" && rec.feedback === "correct")
 					acc.notedPositive += 1;
-				} else if (rec.status === "noted" && rec.feedback === "incorrect") {
+				else if (rec.status === "noted" && rec.feedback === "incorrect")
 					acc.notedNegative += 1;
-				}
-
 				return acc;
 			},
 			{
@@ -257,110 +268,96 @@ export const SummarySection = ({
 				Analysis Summary
 			</h3>
 
-			<div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-				<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-					<div className="p-2 rounded-full bg-primary/10">
-						<TrendingUp className="h-5 w-5 text-primary" />
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Average Score</p>
-						<p className="text-2xl font-bold text-foreground">
-							{averageScore}%
-						</p>
-					</div>
-				</div>
-
-				<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-					<div className="p-2 rounded-full bg-accent/10">
-						<TrendingUp className="h-5 w-5 text-accent" />
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Total Matches</p>
-						<p className="text-2xl font-bold text-foreground">{totalMatches}</p>
-					</div>
-				</div>
-
-				<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-					<div className="p-2 rounded-full bg-emerald-100">
-						<ThumbsUp className="h-5 w-5 text-emerald-600" />
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Supported Matches</p>
-						<p className="text-2xl font-bold text-foreground">
-							{supportedMatches}
-						</p>
-					</div>
-				</div>
-
-				<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-					<div className="p-2 rounded-full bg-slate-200">
-						<ThumbsDown className="h-5 w-5 text-slate-600" />
-					</div>
-					<div>
-						<p className="text-xs text-muted-foreground">Noted Matches</p>
-						<p className="text-2xl font-bold text-foreground">{notedMatches}</p>
-					</div>
-				</div>
+			<div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
+				<StatCard
+					label="Average Score"
+					value={`${averageScore}%`}
+					icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+					accent="border-l-4 border-l-primary"
+				/>
+				<StatCard
+					label="Total Matches"
+					value={totalMatches}
+					icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+					accent="border-l-4 border-l-accent"
+				/>
+				<StatCard
+					label="Supported"
+					value={supportedMatches}
+					icon={<CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+					accent="border-l-4 border-l-emerald-500"
+				/>
+				<StatCard
+					label="Noted"
+					value={notedMatches}
+					icon={<Bookmark className="h-4 w-4 text-sky-500" />}
+					accent="border-l-4 border-l-sky-500"
+				/>
 			</div>
 
-			<div className="mb-6">
-				<h4 className="text-sm font-semibold text-foreground mb-3">
-					Feedback Summary
-				</h4>
-				<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-					<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-						<div className="p-2 rounded-full bg-emerald-100">
-							<ThumbsUp className="h-5 w-5 text-emerald-600" />
-						</div>
-						<div>
-							<p className="text-xs text-muted-foreground">
-								Positive Feedback - Supported Recommendations
-							</p>
-							<p className="text-2xl font-bold text-foreground">
-								{feedbackBreakdown.supportedPositive}
+			<div className="mb-8">
+				<div className="flex items-center gap-2 mb-4">
+					<MessageSquare className="h-4 w-4 text-muted-foreground" />
+					<h4 className="text-sm font-semibold text-foreground">
+						Feedback Breakdown
+					</h4>
+				</div>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="rounded-xl border bg-card p-5 shadow-sm">
+						<div className="flex items-center gap-2 mb-4">
+							<CheckCircle2 className="h-4 w-4 text-emerald-500" />
+							<p className="text-sm font-medium text-foreground">
+								Supported Recommendations
 							</p>
 						</div>
-					</div>
-
-					<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-						<div className="p-2 rounded-full bg-red-100">
-							<ThumbsDown className="h-5 w-5 text-red-600" />
-						</div>
-						<div>
-							<p className="text-xs text-muted-foreground">
-								Negative Feedback - Supported Recommendations
-							</p>
-							<p className="text-2xl font-bold text-foreground">
-								{feedbackBreakdown.supportedNegative}
-							</p>
-						</div>
-					</div>
-
-					<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-						<div className="p-2 rounded-full bg-emerald-100">
-							<ThumbsUp className="h-5 w-5 text-emerald-600" />
-						</div>
-						<div>
-							<p className="text-xs text-muted-foreground">
-								Positive Feedback - Noted Recommendations
-							</p>
-							<p className="text-2xl font-bold text-foreground">
-								{feedbackBreakdown.notedPositive}
-							</p>
+						<div className="grid grid-cols-2 gap-3">
+							<div className="rounded-lg bg-emerald-50 border border-emerald-100 p-3 flex items-center gap-3">
+								<ThumbsUp className="h-5 w-5 text-emerald-600 shrink-0" />
+								<div>
+									<p className="text-2xl font-bold text-emerald-900 leading-none">
+										{feedbackBreakdown.supportedPositive}
+									</p>
+									<p className="text-xs text-emerald-700 mt-1">Positive</p>
+								</div>
+							</div>
+							<div className="rounded-lg bg-red-50 border border-red-100 p-3 flex items-center gap-3">
+								<ThumbsDown className="h-5 w-5 text-red-500 shrink-0" />
+								<div>
+									<p className="text-2xl font-bold text-red-900 leading-none">
+										{feedbackBreakdown.supportedNegative}
+									</p>
+									<p className="text-xs text-red-700 mt-1">Negative</p>
+								</div>
+							</div>
 						</div>
 					</div>
 
-					<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-						<div className="p-2 rounded-full bg-red-100">
-							<ThumbsDown className="h-5 w-5 text-red-600" />
+					<div className="rounded-xl border bg-card p-5 shadow-sm">
+						<div className="flex items-center gap-2 mb-4">
+							<Bookmark className="h-4 w-4 text-sky-500" />
+							<p className="text-sm font-medium text-foreground">
+								Noted Recommendations
+							</p>
 						</div>
-						<div>
-							<p className="text-xs text-muted-foreground">
-								Negative Feedback - Noted Recommendations
-							</p>
-							<p className="text-2xl font-bold text-foreground">
-								{feedbackBreakdown.notedNegative}
-							</p>
+						<div className="grid grid-cols-2 gap-3">
+							<div className="rounded-lg bg-emerald-50 border border-emerald-100 p-3 flex items-center gap-3">
+								<ThumbsUp className="h-5 w-5 text-emerald-600 shrink-0" />
+								<div>
+									<p className="text-2xl font-bold text-emerald-900 leading-none">
+										{feedbackBreakdown.notedPositive}
+									</p>
+									<p className="text-xs text-emerald-700 mt-1">Positive</p>
+								</div>
+							</div>
+							<div className="rounded-lg bg-red-50 border border-red-100 p-3 flex items-center gap-3">
+								<ThumbsDown className="h-5 w-5 text-red-500 shrink-0" />
+								<div>
+									<p className="text-2xl font-bold text-red-900 leading-none">
+										{feedbackBreakdown.notedNegative}
+									</p>
+									<p className="text-xs text-red-700 mt-1">Negative</p>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
