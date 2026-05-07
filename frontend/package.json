@@ -3,6 +3,7 @@
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
+	"packageManager": "pnpm@10",
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
@@ -65,9 +66,6 @@
 		"vaul": "^0.9.9",
 		"xlsx": "^0.18.5",
 		"zod": "^3.25.76"
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": ["@swc/core", "esbuild"]
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.13",
