@@ -181,6 +181,30 @@ export const SummarySection = ({
 		);
 	}, [recommendations]);
 
+	const feedbackBreakdown = useMemo(() => {
+		return recommendations.reduce(
+			(acc, rec) => {
+				if (rec.status === "supported" && rec.feedback === "correct") {
+					acc.supportedPositive += 1;
+				} else if (rec.status === "supported" && rec.feedback === "incorrect") {
+					acc.supportedNegative += 1;
+				} else if (rec.status === "noted" && rec.feedback === "correct") {
+					acc.notedPositive += 1;
+				} else if (rec.status === "noted" && rec.feedback === "incorrect") {
+					acc.notedNegative += 1;
+				}
+
+				return acc;
+			},
+			{
+				supportedPositive: 0,
+				supportedNegative: 0,
+				notedPositive: 0,
+				notedNegative: 0,
+			},
+		);
+	}, [recommendations]);
+
 	const renderCategoryList = (
 		categories: { name: string; count: number; color: string }[],
 		emptyLabel: string,
@@ -275,6 +299,69 @@ export const SummarySection = ({
 					<div>
 						<p className="text-xs text-muted-foreground">Noted Matches</p>
 						<p className="text-2xl font-bold text-foreground">{notedMatches}</p>
+					</div>
+				</div>
+			</div>
+
+			<div className="mb-6">
+				<h4 className="text-sm font-semibold text-foreground mb-3">
+					Feedback Summary
+				</h4>
+				<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+					<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
+						<div className="p-2 rounded-full bg-emerald-100">
+							<ThumbsUp className="h-5 w-5 text-emerald-600" />
+						</div>
+						<div>
+							<p className="text-xs text-muted-foreground">
+								Positive Feedback - Supported Recommendations
+							</p>
+							<p className="text-2xl font-bold text-foreground">
+								{feedbackBreakdown.supportedPositive}
+							</p>
+						</div>
+					</div>
+
+					<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
+						<div className="p-2 rounded-full bg-red-100">
+							<ThumbsDown className="h-5 w-5 text-red-600" />
+						</div>
+						<div>
+							<p className="text-xs text-muted-foreground">
+								Negative Feedback - Supported Recommendations
+							</p>
+							<p className="text-2xl font-bold text-foreground">
+								{feedbackBreakdown.supportedNegative}
+							</p>
+						</div>
+					</div>
+
+					<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
+						<div className="p-2 rounded-full bg-emerald-100">
+							<ThumbsUp className="h-5 w-5 text-emerald-600" />
+						</div>
+						<div>
+							<p className="text-xs text-muted-foreground">
+								Positive Feedback - Noted Recommendations
+							</p>
+							<p className="text-2xl font-bold text-foreground">
+								{feedbackBreakdown.notedPositive}
+							</p>
+						</div>
+					</div>
+
+					<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
+						<div className="p-2 rounded-full bg-red-100">
+							<ThumbsDown className="h-5 w-5 text-red-600" />
+						</div>
+						<div>
+							<p className="text-xs text-muted-foreground">
+								Negative Feedback - Noted Recommendations
+							</p>
+							<p className="text-2xl font-bold text-foreground">
+								{feedbackBreakdown.notedNegative}
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
