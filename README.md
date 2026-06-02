@@ -40,7 +40,20 @@ In a separate terminal:
 cd backend && uv run worker
 ```
 
+### Frontend only (no Docker)
+
+```sh
+cd frontend && corepack enable && corepack prepare pnpm@10.33.4 --activate && pnpm install && pnpm run dev
+```
+
 See [backend/README.md](backend/README.md) for backend setup, environment variables, and endpoints.
+
+Useful backend environment variables:
+
+| Variable | Description |
+| --- | --- |
+| `OPENROUTER_API_KEY` | API key for OpenRouter LLM, embedding, and rerank calls |
+| `SAVE_TEXT_PAYLOADS` | Optional text input snapshot retention; defaults to `false` |
 
 ## Docker images
 

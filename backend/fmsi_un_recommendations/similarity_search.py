@@ -6,8 +6,8 @@ from typing import Any
 from loguru import logger
 from pydantic import BaseModel
 
+from fmsi_un_recommendations.openrouter import embed_texts_openrouter
 from fmsi_un_recommendations.settings import Settings
-from fmsi_un_recommendations.utils import get_text_embedder
 
 settings = Settings()
 
@@ -41,13 +41,13 @@ def embed_un_recommendations(rows: list[dict[str, str]]) -> list[dict[str, Any]]
         return []
 
     logger.info("Embedding {} UN rows", len(rows))
-    embedder = get_text_embedder()
     payloads = [_row_to_text_payload(row) for row in rows]
+    embeddings = _embed_payloads(payloads)
 
     enriched_rows: list[dict[str, Any]] = []
-    for row, embedding in zip(rows, embedder.embed(payloads), strict=False):
+    for row, embedding in zip(rows, embeddings, strict=False):
         enriched_row = dict(row)
-        enriched_row["embedding"] = _embedding_to_list(embedding)
+        enriched_row["embedding"] = embedding
         enriched_rows.append(enriched_row)
     logger.info("Embedded UN rows: {}", len(enriched_rows))
     return enriched_rows
@@ -61,18 +61,18 @@ def embed_fmsi_recommendations(
         return []
 
     logger.info("Embedding {} FMSI recommendations", len(recommendations))
-    embedder = get_text_embedder()
     payloads = [rec.recommendation for rec in recommendations]
+    embeddings = _embed_payloads(payloads)
 
     enriched_rows: list[dict[str, Any]] = []
-    for rec, embedding in zip(recommendations, embedder.embed(payloads), strict=False):
+    for rec, embedding in zip(recommendations, embeddings, strict=False):
         enriched_rows.append(
             {
                 "recommendation": rec.recommendation,
                 "theme": rec.theme,
                 "beneficiaries": rec.beneficiaries,
                 "domain": rec.domain,
-                "embedding": _embedding_to_list(embedding),
+                "embedding": embedding,
             }
         )
     logger.info("Embedded FMSI recommendations: {}", len(enriched_rows))
@@ -124,3 +124,15 @@ def _embedding_to_list(embedding: Any) -> list[float]:
     if hasattr(embedding, "tolist"):
         return [float(v) for v in embedding.tolist()]
     return [float(v) for v in embedding]
+
+
+def _embed_payloads(payloads: list[str]) -> list[list[float]]:
+    if settings.embedding_provider.lower() != "openrouter":
+        raise NotImplementedError(f"Unsupported embedding provider: {settings.embedding_provider}")
+
+    embeddings: list[list[float]] = []
+    batch_size = max(settings.embedding_batch_size, 1)
+    for start in range(0, len(payloads), batch_size):
+        batch = payloads[start : start + batch_size]
+        embeddings.extend(embed_texts_openrouter(batch))
+    return embeddings

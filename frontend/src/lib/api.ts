@@ -1,8 +1,11 @@
 /**
  * Frontend API client for the FMSI UN Recommendations backend.
- * Endpoints: POST /matches (un_doc, fmsi_pdf), POST /feedback.
+ * Endpoints: POST /matches (FMSI Markdown, UPR rows), POST /feedback.
  * Local dev: http://localhost:8000. Docker/prod: same-origin /api (nginx proxies to backend via BACKEND_URL).
  */
+import mammoth from "mammoth";
+import { pdfjs } from "react-pdf";
+
 const API_BASE =
 	import.meta.env.VITE_API_URL ??
 	(import.meta.env.PROD ? "" : "http://localhost:8000");
@@ -81,6 +84,7 @@ export interface AnalysisSessionResponse {
 interface BackendMatchEntry {
 	match_id: string;
 	score: number;
+	reranker_score?: number | null;
 	source_index: number;
 	source_text: string;
 	source_row?: Record<string, unknown>;
@@ -132,6 +136,10 @@ function mapMatchToRecommendation(
 	const status = positionOfState?.toLowerCase().includes("noted")
 		? "noted"
 		: "supported";
+	const rankingScore =
+		typeof match.reranker_score === "number"
+			? match.reranker_score
+			: match.score;
 
 	return {
 		id: match.match_id,
@@ -149,7 +157,7 @@ function mapMatchToRecommendation(
 			recommendation: recommendation || match.target_text,
 			domain,
 		},
-		score: Math.round(match.score * 100),
+		score: Math.round(rankingScore * 100),
 		feedback:
 			match.feedback === "correct" || match.feedback === "incorrect"
 				? match.feedback
@@ -188,17 +196,59 @@ export async function analyzeDocuments(
 			"Expected one DOCX (.doc/.docx) and one PDF. Please upload one of each.",
 		);
 	}
-	const formData = new FormData();
-	formData.append("fmsi_pdf", pdfFile);
-	formData.append("un_doc", docxFile);
-	if (jobId) {
-		formData.append("job_id", jobId);
-	}
 
+	try {
+		const [fmsiMarkdown, uprRows] = await Promise.all([
+			extractPdfMarkdown(pdfFile),
+			extractDocxRows(docxFile),
+		]);
+		if (!fmsiMarkdown.trim()) {
+			throw new Error("Could not extract text from the PDF.");
+		}
+		if (uprRows.length === 0) {
+			throw new Error("Could not extract recommendation rows from the DOCX.");
+		}
+		return await analyzeTextPayload({
+			jobId,
+			sourceFilename: pdfFile.name,
+			referenceFilename: docxFile.name,
+			fmsiMarkdown,
+			uprRows,
+		});
+	} catch (error) {
+		console.warn("Browser document extraction failed", error);
+		throw new Error(
+			error instanceof Error
+				? error.message
+				: "Could not read the documents in the browser.",
+		);
+	}
+}
+
+async function analyzeTextPayload({
+	jobId,
+	sourceFilename,
+	referenceFilename,
+	fmsiMarkdown,
+	uprRows,
+}: {
+	jobId?: string;
+	sourceFilename: string;
+	referenceFilename: string;
+	fmsiMarkdown: string;
+	uprRows: Record<string, string>[];
+}): Promise<{ jobId: string }> {
 	const base = `${API_BASE}${API_PREFIX}`.replace(/\/$/, "");
 	const res = await fetch(`${base}/matches`, {
 		method: "POST",
-		body: formData,
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			job_id: jobId,
+			source_filename: sourceFilename,
+			reference_filename: referenceFilename,
+			fmsi_markdown: fmsiMarkdown,
+			upr_rows: uprRows,
+		}),
 	});
 
 	if (!res.ok) {
@@ -208,6 +258,76 @@ export async function analyzeDocuments(
 
 	const data = (await res.json()) as { job_id: string };
 	return { jobId: data.job_id };
+}
+
+async function extractPdfMarkdown(file: File): Promise<string> {
+	pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+	const bytes = new Uint8Array(await file.arrayBuffer());
+	const pdf = await pdfjs.getDocument({ data: bytes }).promise;
+	const pages: string[] = [];
+	for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+		const page = await pdf.getPage(pageNumber);
+		const content = await page.getTextContent();
+		const text = content.items
+			.map((item) => ("str" in item ? item.str : ""))
+			.join(" ")
+			.replace(/\s+/g, " ")
+			.trim();
+		if (text) {
+			pages.push(`## Page ${pageNumber}\n\n${text}`);
+		}
+	}
+	return pages.join("\n\n");
+}
+
+async function extractDocxRows(file: File): Promise<Record<string, string>[]> {
+	const arrayBuffer = await file.arrayBuffer();
+	const result = await mammoth.convertToHtml({ arrayBuffer });
+	return htmlTablesToRows(result.value);
+}
+
+function htmlTablesToRows(html: string): Record<string, string>[] {
+	const document = new DOMParser().parseFromString(html, "text/html");
+	const rows: Record<string, string>[] = [];
+	for (const table of Array.from(document.querySelectorAll("table"))) {
+		const tableRows = Array.from(table.querySelectorAll("tr"));
+		if (tableRows.length < 2) continue;
+		const headers = Array.from(tableRows[0].querySelectorAll("th,td")).map(
+			(cell) => normalizeCellText(cell.textContent ?? ""),
+		);
+		let currentTheme: Record<string, string> = {};
+		for (const row of tableRows.slice(1)) {
+			const cells = Array.from(row.querySelectorAll("th,td")).map((cell) =>
+				normalizeCellText(cell.textContent ?? ""),
+			);
+			if (cells[0]?.toLowerCase().startsWith("theme")) {
+				const [key, ...rest] = cells[0].split(":");
+				const value = rest.join(":").trim();
+				currentTheme = value ? { [key.trim()]: value } : {};
+				continue;
+			}
+			if (cells.length !== headers.length || cells.every((cell) => !cell)) {
+				continue;
+			}
+			rows.push(
+				headers.reduce<Record<string, string>>(
+					(acc, header, index) => {
+						acc[header] = cells[index] ?? "";
+						return acc;
+					},
+					{ ...currentTheme },
+				),
+			);
+		}
+	}
+	return rows;
+}
+
+function normalizeCellText(value: string): string {
+	return value
+		.trim()
+		.replace(/\u00a0/g, " ")
+		.replace(/\s+/g, " ");
 }
 
 export async function fetchPrediction(

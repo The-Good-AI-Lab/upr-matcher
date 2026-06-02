@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import multiprocessing
 import time
 import uuid
@@ -11,7 +12,7 @@ from loguru import logger
 
 from .db import get_database
 from .recommendation_processing import (
-    extract_fmsi_pdf_recommendations,
+    extract_fmsi_text_recommendations,
     extract_un_recommendation_rows,
 )
 from .reranker import RecommendationReranker
@@ -24,6 +25,7 @@ from .similarity_search import (
     embed_un_recommendations,
     match_recommendation_vectors,
 )
+from .utils import read_text_file
 
 
 def _build_matches(
@@ -31,23 +33,45 @@ def _build_matches(
     fmsi_pdf: Path,
     threshold: float,
     report: Callable[[float, str], None] | None = None,
-    reranker_batch_size: int = 16,
+    rerank_candidate_limit: int = 30,
 ) -> tuple[
     list[dict[str, Any]],
     list[dict[str, Any]],
     list[dict[str, Any]],
     list[FmsiRecommendation],
 ]:
-    un_rows = extract_un_recommendation_rows(un_doc)
+    un_rows = _load_un_rows(un_doc)
+    fmsi_markdown = read_text_file(fmsi_pdf)
+    return _build_matches_from_text(
+        un_rows,
+        fmsi_markdown,
+        threshold,
+        report,
+        rerank_candidate_limit,
+    )
+
+
+def _build_matches_from_text(
+    un_rows: list[dict[str, Any]],
+    fmsi_markdown: str,
+    threshold: float,
+    report: Callable[[float, str], None] | None = None,
+    rerank_candidate_limit: int = 30,
+) -> tuple[
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    list[FmsiRecommendation],
+]:
     if report:
-        report(20, "Reading the UPR document")
+        report(20, "Reading the UPR recommendations")
     embedded_un = embed_un_recommendations(un_rows)
     if report:
         report(35, "Understanding UPR recommendations")
 
-    fmsi_recommendations = extract_fmsi_pdf_recommendations(fmsi_pdf)
+    fmsi_recommendations = extract_fmsi_text_recommendations(fmsi_markdown)
     if report:
-        report(45, "Reading the FMSI document")
+        report(45, "Reading the FMSI recommendations")
     embedded_fmsi = embed_fmsi_recommendations(fmsi_recommendations)
     if report:
         report(55, "Comparing recommendations")
@@ -63,14 +87,15 @@ def _build_matches(
         if report:
             report(70, "Prioritizing the best matches")
         try:
-            reranker = RecommendationReranker(min_k=1, max_k=10, batch_size=reranker_batch_size)
+            reranker = RecommendationReranker(min_k=1, max_k=10)
             matches: list[dict[str, Any]] = []
             for group in grouped_matches.values():
-                fmsi_text = group[0]["source_text"]
-                candidate_texts = [m["target_text"] for m in group]
+                limited_group = sorted(group, key=lambda item: item["score"], reverse=True)[:rerank_candidate_limit]
+                fmsi_text = limited_group[0]["source_text"]
+                candidate_texts = [m["target_text"] for m in limited_group]
                 rerank_results = reranker.rerank([fmsi_text], candidate_texts)
                 if not rerank_results:
-                    matches.extend({**match} for match in group)
+                    matches.extend({**match} for match in limited_group)
                     continue
 
                 logger.info(
@@ -79,7 +104,7 @@ def _build_matches(
                     fmsi_text[:80].replace("\n", " "),
                 )
                 for rerank_result in rerank_results:
-                    original_match = group[rerank_result.candidate_index]
+                    original_match = limited_group[rerank_result.candidate_index]
                     matches.append(
                         {
                             **original_match,
@@ -97,13 +122,21 @@ def _build_matches(
     return embedded_un, embedded_fmsi, matches, fmsi_recommendations
 
 
+def _load_un_rows(un_doc: Path) -> list[dict[str, str]]:
+    if un_doc.suffix.lower() == ".json":
+        rows = json.loads(un_doc.read_text(encoding="utf-8"))
+        if not isinstance(rows, list):
+            raise ValueError("UPR rows JSON must be a list.")
+        return [{str(key): str(value) for key, value in row.items()} for row in rows if isinstance(row, dict)]
+    return extract_un_recommendation_rows(un_doc)
+
+
 def _execute_job(job_id: str) -> None:
     """
     Runs the full ML pipeline for a single job.
 
-    Intentionally designed to run inside a subprocess so that all model
-    memory (ONNX buffers, cross-encoder weights, fastembed tensors) is
-    released when the process exits — even after a SIGKILL (OOM).
+    Intentionally designed to run inside a subprocess so that parser/client
+    memory is released when the process exits — even after a SIGKILL (OOM).
     The parent loop stays alive to pick up the next job.
     """
     settings = Settings()
@@ -120,19 +153,30 @@ def _execute_job(job_id: str) -> None:
             logger.opt(exception=True).warning("Could not update progress for job {}", job_id)
 
     try:
-        report(10, "Files received. Getting them ready.")
+        report(10, "Inputs received. Getting them ready.")
         logger.info(
             "Starting match pipeline for job {}: extract → embed → match (threshold={})",
             job_id,
             settings.match_threshold,
         )
-        embedded_un, embedded_fmsi, matches, _ = _build_matches(
-            Path(job.reference_path),
-            Path(job.source_path),
-            settings.match_threshold,
-            report,
-            settings.reranker_batch_size,
-        )
+        if job.source_text is not None and job.reference_rows is not None:
+            embedded_un, embedded_fmsi, matches, _ = _build_matches_from_text(
+                job.reference_rows,
+                job.source_text,
+                settings.match_threshold,
+                report,
+                settings.rerank_candidate_limit,
+            )
+        elif job.reference_path and job.source_path:
+            embedded_un, embedded_fmsi, matches, _ = _build_matches(
+                Path(job.reference_path),
+                Path(job.source_path),
+                settings.match_threshold,
+                report,
+                settings.rerank_candidate_limit,
+            )
+        else:
+            raise ValueError("Job is missing text payloads.")
         for match in matches:
             match.setdefault("match_id", str(uuid.uuid4()))
 
@@ -202,9 +246,8 @@ def run_worker() -> None:
 
         logger.info("Picked up job {}, user={}", job.id, job.user_email)
 
-        # Each job runs in its own subprocess so all ML model memory
-        # (fastembed ONNX, cross-encoder weights) is freed on exit.
-        # This prevents OOM accumulation across back-to-back jobs.
+        # Each job runs in its own subprocess so any native parser/model-client
+        # memory is released between jobs.
         proc = multiprocessing.Process(
             target=_execute_job,
             args=(job.id,),
