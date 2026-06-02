@@ -11,15 +11,12 @@ dependencies = [
     "pydantic>=2.11.9",
     "pypdf>=6.0.0",
     "python-docx>=1.2.0",
-    "fastembed>=0.3.1",
     "pydantic-ai>=0.7.0",
     "streamlit>=1.40.0",
     "fastapi>=0.110.0",
     "uvicorn>=0.30.0",
-    "python-multipart>=0.0.9",
     "psycopg[binary]>=3.1.0",
     "loguru>=0.7.0",
-    "sentence-transformers>=2.7.0",
 ]
 
 [project.scripts]

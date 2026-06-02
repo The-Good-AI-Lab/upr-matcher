@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import json
 import uuid
 from pathlib import Path
 from typing import Any, Literal
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from pydantic import BaseModel, ConfigDict
@@ -14,7 +15,6 @@ from .settings import Settings
 from .similarity_search import Recommendation as FmsiRecommendation
 
 UPLOAD_ROOT = Path("data/uploads")
-UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 class MatchEntry(BaseModel):
@@ -68,6 +68,14 @@ class FeedbackRequest(BaseModel):
     notes: str | None = None
 
 
+class TextMatchRequest(BaseModel):
+    job_id: str | None = None
+    source_filename: str = "source.md"
+    reference_filename: str = "upr_rows.json"
+    fmsi_markdown: str
+    upr_rows: list[dict[str, Any]]
+
+
 class FeedbackResponse(BaseModel):
     feedback_id: str
 
@@ -84,18 +92,14 @@ def _get_settings() -> Settings:
     return Settings()
 
 
-async def _persist_upload(upload: UploadFile, category: str) -> Path:
+def _persist_text_payload(content: str, category: str, filename: str, suffix: str) -> Path:
     destination_dir = UPLOAD_ROOT / category
     destination_dir.mkdir(parents=True, exist_ok=True)
-    filename = Path(upload.filename or f"{category}.bin").name
-    destination_path = destination_dir / f"{uuid.uuid4()}_{filename}"
-    with destination_path.open("wb") as buffer:
-        while True:
-            chunk = await upload.read(1024 * 1024)
-            if not chunk:
-                break
-            buffer.write(chunk)
-    await upload.close()
+    safe_name = Path(filename).name or f"{category}{suffix}"
+    if Path(safe_name).suffix.lower() != suffix:
+        safe_name = f"{safe_name}{suffix}"
+    destination_path = destination_dir / f"{uuid.uuid4()}_{safe_name}"
+    destination_path.write_text(content, encoding="utf-8")
     return destination_path
 
 
@@ -161,7 +165,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.on_event("startup")
     def _log_startup() -> None:
         logger.info(
-            "FMSI UN Recommendations API started; POST /matches (fmsi_pdf, un_doc), POST /feedback, GET /health"
+            "FMSI UN Recommendations API started; POST /matches (text payload), POST /feedback, GET /health"
         )
         try:
             db = get_database(app_settings)
@@ -179,35 +183,46 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return get_database(app_settings)
 
     @app.post("/matches", response_model=JobEnqueuedResponse)
-    async def create_matches(
+    def create_matches(
+        payload: TextMatchRequest,
         request: Request,
-        fmsi_pdf: UploadFile = File(...),
-        un_doc: UploadFile = File(...),
-        job_id: str | None = Form(default=None),
         db: DatabaseAdapter = Depends(_get_db_dependency),
     ) -> JobEnqueuedResponse:
-        async def _enqueue_job() -> JobEnqueuedResponse:
-            tracking_id = job_id or str(uuid.uuid4())
-            user_email: str | None = request.headers.get("X-Auth-Request-Email")
-            logger.info(
-                "POST /matches: queuing job {} for user={} (fmsi_pdf={}, un_doc={})",
-                tracking_id,
-                user_email,
-                fmsi_pdf.filename,
-                un_doc.filename,
-            )
-            fmsi_path = await _persist_upload(fmsi_pdf, "fmsi")
-            un_doc_path = await _persist_upload(un_doc, "un")
-            db.create_job(
-                job_id=tracking_id,
-                user_email=user_email,
-                source_path=str(fmsi_path),
-                reference_path=str(un_doc_path),
-            )
-            logger.info("Job {} enqueued", tracking_id)
-            return JobEnqueuedResponse(job_id=tracking_id)
+        if not payload.fmsi_markdown.strip():
+            raise HTTPException(status_code=400, detail="fmsi_markdown is empty")
+        if not payload.upr_rows:
+            raise HTTPException(status_code=400, detail="upr_rows is empty")
 
-        return await _enqueue_job()
+        tracking_id = payload.job_id or str(uuid.uuid4())
+        user_email: str | None = request.headers.get("X-Auth-Request-Email")
+        fmsi_path: Path | None = None
+        rows_path: Path | None = None
+        if app_settings.save_text_payloads:
+            fmsi_path = _persist_text_payload(
+                payload.fmsi_markdown,
+                "fmsi_text",
+                payload.source_filename,
+                ".md",
+            )
+            rows_path = _persist_text_payload(
+                json.dumps(payload.upr_rows, ensure_ascii=False),
+                "un_rows",
+                payload.reference_filename,
+                ".json",
+            )
+
+        db.create_job(
+            job_id=tracking_id,
+            user_email=user_email,
+            source_path=str(fmsi_path) if fmsi_path else None,
+            reference_path=str(rows_path) if rows_path else None,
+            source_filename=payload.source_filename,
+            reference_filename=payload.reference_filename,
+            source_text=payload.fmsi_markdown,
+            reference_rows=payload.upr_rows,
+        )
+        logger.info("Text job {} enqueued for user={}", tracking_id, user_email)
+        return JobEnqueuedResponse(job_id=tracking_id)
 
     @app.post("/feedback", response_model=FeedbackResponse)
     def create_feedback(
@@ -294,8 +309,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 status=job.status,  # type: ignore[arg-type]
                 percent=job.percent,
                 prediction_id=job.prediction_id,
-                source_filename=Path(job.source_path).name if job.source_path else None,
-                reference_filename=Path(job.reference_path).name if job.reference_path else None,
+                source_filename=job.source_filename or (Path(job.source_path).name if job.source_path else None),
+                reference_filename=job.reference_filename
+                or (Path(job.reference_path).name if job.reference_path else None),
                 created_at=job.created_at,
                 updated_at=job.updated_at,
             )

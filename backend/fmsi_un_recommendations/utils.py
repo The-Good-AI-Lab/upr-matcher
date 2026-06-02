@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Final
 from docx import Document
 from docx.table import Table
 from docx.text.paragraph import Paragraph
-from fastembed import TextEmbedding
 from openai import OpenAI
 from pypdf import PdfReader
 
@@ -48,15 +47,7 @@ def get_openrouter_client() -> OpenAI:
     )
 
 
-_text_embedder: TextEmbedding | None = None
 _chat_model: OpenAIChatModelType | None = None
-
-
-def get_text_embedder() -> TextEmbedding:
-    global _text_embedder
-    if _text_embedder is None:
-        _text_embedder = TextEmbedding(model_name=settings.embedding_model)
-    return _text_embedder
 
 
 def prompt_openrouter(prompt: str) -> str:
