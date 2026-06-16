@@ -1,0 +1,941 @@
+{
+  "case": {
+    "case_id": "costa_rica_2024",
+    "reference_doc": "/home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/Matrix of recommendations_CostaRica_2024.docx",
+    "reference_file_sha256": "9c94784b1b7271986a7c03c84bdd9d2a725b2563d62d17d817fa2f1c20bc39cf",
+    "source_file_sha256": "2de8b621eced3ad6a46ac6e5040a4fbe8925f35c46c9a24bce18a42a6028a237",
+    "source_pdf": "/home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/2024_UPR Costa Rica.pdf"
+  },
+  "created_at": "2026-06-16T20:42:35.135543+00:00",
+  "document_extraction": {
+    "duplicate_target_ids": {},
+    "gold_source_ids_missing_from_source_text": [
+      "costa_rica_2024:discrimination:3"
+    ],
+    "gold_source_recommendations": 27,
+    "gold_source_recommendations_present_in_source_text": 26,
+    "gold_source_text_coverage": 0.963,
+    "gold_target_id_coverage": 0.9878,
+    "gold_target_id_text_coverage": 1.0,
+    "gold_target_ids": 82,
+    "gold_target_ids_missing_from_parsed_rows": [
+      "120.49"
+    ],
+    "gold_target_ids_missing_from_reference_text": [],
+    "gold_target_ids_present_in_reference": 81,
+    "gold_target_ids_present_in_reference_text": 82,
+    "reference_rows": 299,
+    "reference_rows_with_target_id": 298,
+    "reference_text_chars": 345527,
+    "source_text_chars": 43609
+  },
+  "fmsi_extraction": {
+    "live_openrouter": false,
+    "source_mode": "gold"
+  },
+  "matching_inputs": {
+    "gold_links_evaluated": 90,
+    "gold_sources_evaluated": 18,
+    "reference_rows": 299,
+    "source_recommendations": 27,
+    "source_rows": [
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:discrimination:1",
+        "text": "Promote a safe space for discriminated minorities by creating reporting and support centers for victims of all types of discrimination, especially children, adolescents, indigenous people, migrants and women.",
+        "theme": "DISCRIMINATION"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:discrimination:2",
+        "text": "Redouble efforts in the implementation of its National Policy for Gender Equality and Equity.",
+        "theme": "DISCRIMINATION"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:discrimination:3",
+        "text": "Promote non-discrimination towards people with disabilities, through the creation of programs that help them to integrate into society in an inclusive way, including the creation of awareness campaigns for society with the aim of eradicating their discrimination.",
+        "theme": "DISCRIMINATION"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:right_to_education:1",
+        "text": "Ensure the quality of education, through the creation of a financing plan in order to invest in the improvement of public educational structures.",
+        "theme": "RIGHT TO EDUCATION"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:right_to_education:2",
+        "text": "To offer primary and secondary school teachers training and development programs for better performance in the educational classroom.",
+        "theme": "RIGHT TO EDUCATION"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:right_to_education:3",
+        "text": "Provide financial support to low-income students, migrants, indigenous people, and those living in rural areas so they can continue their studies and reduce the school dropout rate.",
+        "theme": "RIGHT TO EDUCATION"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:right_to_education:4",
+        "text": "Ensure and expedite access, especially for children and young people with fewer resources, to scholarships for the purchase of materials and school meals.",
+        "theme": "RIGHT TO EDUCATION"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:right_to_education:5",
+        "text": "Create spaces where the voices of children and young people can be heard, especially in educational and social settings.",
+        "theme": "RIGHT TO EDUCATION"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:right_to_health:1",
+        "text": "Redouble efforts in creating awareness campaigns about the harmful effects of drug use in the country, especially targeting children and adolescents.",
+        "theme": "RIGHT TO HEALTH"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:right_to_health:2",
+        "text": "Take stricter measures regarding the acquisition of prescription medications",
+        "theme": "RIGHT TO HEALTH"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:right_to_health:3",
+        "text": "Create a more specific data collection system that includes treatment, follow-up, and number of HIV/AIDS cases",
+        "theme": "RIGHT TO HEALTH"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:right_to_health:4",
+        "text": "Conduct awareness campaigns to eradicate stigmatization towards people with HIV/AIDS.",
+        "theme": "RIGHT TO HEALTH"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:right_to_health:5",
+        "text": "Redouble efforts in suicide prevention through psychological support campaigns",
+        "theme": "RIGHT TO HEALTH"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:sexual_exploitation_and_trafficking:1",
+        "text": "The creation of psychological rehabilitation centers for victims of trafficking with trained personnel to follow up on cases.",
+        "theme": "SEXUAL EXPLOITATION AND TRAFFICKING"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:sexual_exploitation_and_trafficking:2",
+        "text": "Monitor the follow-up of criminal complaints on trafficking cases, to prevent obstruction and corruption in their execution.",
+        "theme": "SEXUAL EXPLOITATION AND TRAFFICKING"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:sexual_exploitation_and_trafficking:3",
+        "text": "Strengthen the measures of laws and policies on the care of victims of trafficking.",
+        "theme": "SEXUAL EXPLOITATION AND TRAFFICKING"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:transport_and_infrastructure:1",
+        "text": "Improve the country's road infrastructure.",
+        "theme": "TRANSPORT AND INFRASTRUCTURE"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:transport_and_infrastructure:2",
+        "text": "Implement a broader and cheaper public transport plan.",
+        "theme": "TRANSPORT AND INFRASTRUCTURE"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:transport_and_infrastructure:3",
+        "text": "Create alternative and non-polluting transport systems.",
+        "theme": "TRANSPORT AND INFRASTRUCTURE"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:violence_against_children:1",
+        "text": "Intensify efforts in the criminal justice system and monitoring of cases of domestic, sexual and physical violence, to expedite administrative processes.",
+        "theme": "VIOLENCE AGAINST CHILDREN"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:violence_against_children:2",
+        "text": "Create a monitoring plan in police stations to prevent corruption and avoid cases of violence, especially towards children and adolescents.",
+        "theme": "VIOLENCE AGAINST CHILDREN"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:violence_against_children:3",
+        "text": "Redouble efforts in creating awareness campaigns to prevent and eradicate all types of violence.",
+        "theme": "VIOLENCE AGAINST CHILDREN"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:violence_against_children:4",
+        "text": "Guarantee safe public spaces (leisure areas, gardens, etc.) through increased police surveillance.",
+        "theme": "VIOLENCE AGAINST CHILDREN"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:young_peoples_rights:1",
+        "text": "Develop national plans to provide greater employment opportunities for young people",
+        "theme": "YOUNG PEOPLE'S RIGHTS"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:young_peoples_rights:2",
+        "text": "Create training and education plans for young people without higher education so they can enter the labor market",
+        "theme": "YOUNG PEOPLE'S RIGHTS"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:young_peoples_rights:3",
+        "text": "Create awareness campaigns about drug use among young people to prevent their decline and introduction into crime.",
+        "theme": "YOUNG PEOPLE'S RIGHTS"
+      },
+      {
+        "language": "en",
+        "source_id": "costa_rica_2024:young_peoples_rights:4",
+        "text": "Increase support for young people who wish to attend university, providing scholarships that include accommodation and food.",
+        "theme": "YOUNG PEOPLE'S RIGHTS"
+      }
+    ]
+  },
+  "openrouter_usage": {
+    "calls": 0,
+    "completion_tokens": 0,
+    "completion_usd_per_1m": 1.0,
+    "estimated_cost_usd": 0.0,
+    "max_cost_usd": 10.0,
+    "prompt_tokens": 0,
+    "prompt_usd_per_1m": 1.0
+  },
+  "reranking": {
+    "error": null,
+    "metrics": null,
+    "skipped": true,
+    "top_matches": {}
+  },
+  "run_id": "pr1_qwen8b_threshold_0.6_en",
+  "semantic_candidate_matching": {
+    "metrics": {
+      "evaluated_sources": 18,
+      "macro": {
+        "hit@1": 0.3333,
+        "hit@10": 0.5,
+        "hit@3": 0.5,
+        "hit@5": 0.5,
+        "mrr": 0.4167,
+        "ndcg@1": 0.2778,
+        "ndcg@10": 0.2722,
+        "ndcg@3": 0.3085,
+        "ndcg@5": 0.2896,
+        "precision@1": 0.3333,
+        "precision@10": 0.3531,
+        "precision@3": 0.4074,
+        "precision@5": 0.3741,
+        "recall@1": 0.1441,
+        "recall@10": 0.2194,
+        "recall@3": 0.1901,
+        "recall@5": 0.2018
+      },
+      "per_source": {
+        "costa_rica_2024:discrimination:1": {
+          "expected_count": 17,
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "mrr": 0.5,
+          "ndcg@1": 0.0,
+          "ndcg@10": 0.3152,
+          "ndcg@3": 0.3612,
+          "ndcg@5": 0.2864,
+          "precision@1": 0.0,
+          "precision@10": 0.4,
+          "precision@3": 0.6667,
+          "precision@5": 0.4,
+          "recall@1": 0.0,
+          "recall@10": 0.2353,
+          "recall@3": 0.1176,
+          "recall@5": 0.1176,
+          "returned_count": 10
+        },
+        "costa_rica_2024:discrimination:2": {
+          "expected_count": 5,
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "mrr": 1.0,
+          "ndcg@1": 1.0,
+          "ndcg@10": 0.4367,
+          "ndcg@3": 0.5317,
+          "ndcg@5": 0.4367,
+          "precision@1": 1.0,
+          "precision@10": 1.0,
+          "precision@3": 1.0,
+          "precision@5": 1.0,
+          "recall@1": 0.2,
+          "recall@10": 0.2,
+          "recall@3": 0.2,
+          "recall@5": 0.2,
+          "returned_count": 1
+        },
+        "costa_rica_2024:discrimination:3": {
+          "expected_count": 4,
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "mrr": 1.0,
+          "ndcg@1": 0.5,
+          "ndcg@10": 0.2808,
+          "ndcg@3": 0.3194,
+          "ndcg@5": 0.2808,
+          "precision@1": 1.0,
+          "precision@10": 1.0,
+          "precision@3": 1.0,
+          "precision@5": 1.0,
+          "recall@1": 0.25,
+          "recall@10": 0.25,
+          "recall@3": 0.25,
+          "recall@5": 0.25,
+          "returned_count": 1
+        },
+        "costa_rica_2024:right_to_education:1": {
+          "expected_count": 4,
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "mrr": 0.0,
+          "ndcg@1": 0.0,
+          "ndcg@10": 0.0,
+          "ndcg@3": 0.0,
+          "ndcg@5": 0.0,
+          "precision@1": 0.0,
+          "precision@10": 0.0,
+          "precision@3": 0.0,
+          "precision@5": 0.0,
+          "recall@1": 0.0,
+          "recall@10": 0.0,
+          "recall@3": 0.0,
+          "recall@5": 0.0,
+          "returned_count": 0
+        },
+        "costa_rica_2024:right_to_education:3": {
+          "expected_count": 15,
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "mrr": 1.0,
+          "ndcg@1": 1.0,
+          "ndcg@10": 0.8396,
+          "ndcg@3": 1.0,
+          "ndcg@5": 1.0,
+          "precision@1": 1.0,
+          "precision@10": 0.8889,
+          "precision@3": 1.0,
+          "precision@5": 1.0,
+          "recall@1": 0.0667,
+          "recall@10": 0.5333,
+          "recall@3": 0.2,
+          "recall@5": 0.3333,
+          "returned_count": 9
+        },
+        "costa_rica_2024:right_to_education:4": {
+          "expected_count": 2,
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "mrr": 0.0,
+          "ndcg@1": 0.0,
+          "ndcg@10": 0.0,
+          "ndcg@3": 0.0,
+          "ndcg@5": 0.0,
+          "precision@1": 0.0,
+          "precision@10": 0.0,
+          "precision@3": 0.0,
+          "precision@5": 0.0,
+          "recall@1": 0.0,
+          "recall@10": 0.0,
+          "recall@3": 0.0,
+          "recall@5": 0.0,
+          "returned_count": 0
+        },
+        "costa_rica_2024:right_to_education:5": {
+          "expected_count": 2,
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "mrr": 0.0,
+          "ndcg@1": 0.0,
+          "ndcg@10": 0.0,
+          "ndcg@3": 0.0,
+          "ndcg@5": 0.0,
+          "precision@1": 0.0,
+          "precision@10": 0.0,
+          "precision@3": 0.0,
+          "precision@5": 0.0,
+          "recall@1": 0.0,
+          "recall@10": 0.0,
+          "recall@3": 0.0,
+          "recall@5": 0.0,
+          "returned_count": 0
+        },
+        "costa_rica_2024:right_to_health:1": {
+          "expected_count": 1,
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "mrr": 1.0,
+          "ndcg@1": 1.0,
+          "ndcg@10": 1.0,
+          "ndcg@3": 1.0,
+          "ndcg@5": 1.0,
+          "precision@1": 1.0,
+          "precision@10": 1.0,
+          "precision@3": 1.0,
+          "precision@5": 1.0,
+          "recall@1": 1.0,
+          "recall@10": 1.0,
+          "recall@3": 1.0,
+          "recall@5": 1.0,
+          "returned_count": 1
+        },
+        "costa_rica_2024:right_to_health:5": {
+          "expected_count": 1,
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "mrr": 1.0,
+          "ndcg@1": 1.0,
+          "ndcg@10": 1.0,
+          "ndcg@3": 1.0,
+          "ndcg@5": 1.0,
+          "precision@1": 1.0,
+          "precision@10": 1.0,
+          "precision@3": 1.0,
+          "precision@5": 1.0,
+          "recall@1": 1.0,
+          "recall@10": 1.0,
+          "recall@3": 1.0,
+          "recall@5": 1.0,
+          "returned_count": 1
+        },
+        "costa_rica_2024:sexual_exploitation_and_trafficking:1": {
+          "expected_count": 3,
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "mrr": 0.0,
+          "ndcg@1": 0.0,
+          "ndcg@10": 0.0,
+          "ndcg@3": 0.0,
+          "ndcg@5": 0.0,
+          "precision@1": 0.0,
+          "precision@10": 0.0,
+          "precision@3": 0.0,
+          "precision@5": 0.0,
+          "recall@1": 0.0,
+          "recall@10": 0.0,
+          "recall@3": 0.0,
+          "recall@5": 0.0,
+          "returned_count": 0
+        },
+        "costa_rica_2024:sexual_exploitation_and_trafficking:2": {
+          "expected_count": 4,
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "mrr": 0.0,
+          "ndcg@1": 0.0,
+          "ndcg@10": 0.0,
+          "ndcg@3": 0.0,
+          "ndcg@5": 0.0,
+          "precision@1": 0.0,
+          "precision@10": 0.0,
+          "precision@3": 0.0,
+          "precision@5": 0.0,
+          "recall@1": 0.0,
+          "recall@10": 0.0,
+          "recall@3": 0.0,
+          "recall@5": 0.0,
+          "returned_count": 0
+        },
+        "costa_rica_2024:sexual_exploitation_and_trafficking:3": {
+          "expected_count": 8,
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "mrr": 0.5,
+          "ndcg@1": 0.0,
+          "ndcg@10": 0.3155,
+          "ndcg@3": 0.4683,
+          "ndcg@5": 0.3847,
+          "precision@1": 0.0,
+          "precision@10": 0.4,
+          "precision@3": 0.6667,
+          "precision@5": 0.4,
+          "recall@1": 0.0,
+          "recall@10": 0.25,
+          "recall@3": 0.25,
+          "recall@5": 0.25,
+          "returned_count": 5
+        },
+        "costa_rica_2024:transport_and_infrastructure:2": {
+          "expected_count": 1,
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "mrr": 0.0,
+          "ndcg@1": 0.0,
+          "ndcg@10": 0.0,
+          "ndcg@3": 0.0,
+          "ndcg@5": 0.0,
+          "precision@1": 0.0,
+          "precision@10": 0.0,
+          "precision@3": 0.0,
+          "precision@5": 0.0,
+          "recall@1": 0.0,
+          "recall@10": 0.0,
+          "recall@3": 0.0,
+          "recall@5": 0.0,
+          "returned_count": 0
+        },
+        "costa_rica_2024:violence_against_children:1": {
+          "expected_count": 13,
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "mrr": 1.0,
+          "ndcg@1": 0.5,
+          "ndcg@10": 0.3576,
+          "ndcg@3": 0.4693,
+          "ndcg@5": 0.4699,
+          "precision@1": 1.0,
+          "precision@10": 0.3333,
+          "precision@3": 0.6667,
+          "precision@5": 0.6,
+          "recall@1": 0.0769,
+          "recall@10": 0.2308,
+          "recall@3": 0.1538,
+          "recall@5": 0.2308,
+          "returned_count": 9
+        },
+        "costa_rica_2024:violence_against_children:2": {
+          "expected_count": 3,
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "mrr": 0.0,
+          "ndcg@1": 0.0,
+          "ndcg@10": 0.0,
+          "ndcg@3": 0.0,
+          "ndcg@5": 0.0,
+          "precision@1": 0.0,
+          "precision@10": 0.0,
+          "precision@3": 0.0,
+          "precision@5": 0.0,
+          "recall@1": 0.0,
+          "recall@10": 0.0,
+          "recall@3": 0.0,
+          "recall@5": 0.0,
+          "returned_count": 0
+        },
+        "costa_rica_2024:violence_against_children:3": {
+          "expected_count": 4,
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "mrr": 0.5,
+          "ndcg@1": 0.0,
+          "ndcg@10": 0.3543,
+          "ndcg@3": 0.403,
+          "ndcg@5": 0.3543,
+          "precision@1": 0.0,
+          "precision@10": 0.3333,
+          "precision@3": 0.3333,
+          "precision@5": 0.3333,
+          "recall@1": 0.0,
+          "recall@10": 0.25,
+          "recall@3": 0.25,
+          "recall@5": 0.25,
+          "returned_count": 3
+        },
+        "costa_rica_2024:young_peoples_rights:1": {
+          "expected_count": 2,
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "mrr": 0.0,
+          "ndcg@1": 0.0,
+          "ndcg@10": 0.0,
+          "ndcg@3": 0.0,
+          "ndcg@5": 0.0,
+          "precision@1": 0.0,
+          "precision@10": 0.0,
+          "precision@3": 0.0,
+          "precision@5": 0.0,
+          "recall@1": 0.0,
+          "recall@10": 0.0,
+          "recall@3": 0.0,
+          "recall@5": 0.0,
+          "returned_count": 2
+        },
+        "costa_rica_2024:young_peoples_rights:2": {
+          "expected_count": 1,
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "mrr": 0.0,
+          "ndcg@1": 0.0,
+          "ndcg@10": 0.0,
+          "ndcg@3": 0.0,
+          "ndcg@5": 0.0,
+          "precision@1": 0.0,
+          "precision@10": 0.0,
+          "precision@3": 0.0,
+          "precision@5": 0.0,
+          "recall@1": 0.0,
+          "recall@10": 0.0,
+          "recall@3": 0.0,
+          "recall@5": 0.0,
+          "returned_count": 0
+        }
+      }
+    },
+    "raw_match_count": 52,
+    "top_matches": {
+      "costa_rica_2024:discrimination:1": [
+        {
+          "reranker_score": null,
+          "score": 0.759658,
+          "target_id": "120.10",
+          "target_text": "Theme: Equality & non-discrimination\nRecommendation and recommending State: 120.10 Establish complaint and support centres and adapted policies for all victims of violence, discrimination, hate speech and xenophobia, including for migrants and other persons in vulnerable situations, especially in digital spaces and social networks (Romania);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Noted\nHuman rights themes and groups of persons: - Equality & non-discrimination\n- Racial discrimination\n- Access to justice & remedy\nGroups of Persons: \n- Migrants\n- Vulnerable persons/groups\n- Minorities/ racial, ethnic, linguistic, religious or descent-based groups\nRelevant SDGs: - 10 - REDUCED INEQUALITIES\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.680714,
+          "target_id": "119.15",
+          "target_text": "Theme: Equality & non-discrimination\nRecommendation and recommending State: 119.15 Enhance measures to protect Indigenous groups, people of African descent and other minority groups against discrimination, including against xenophobia and violence towards migrants (India);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Equality & non-discrimination\n- Racial discrimination\nGroups of Persons: \n- Indigenous peoples\n- Migrants\n- People of African Descent\n- Minorities/ racial, ethnic, linguistic, religious or descent-based groups\nRelevant SDGs: - 10 - REDUCED INEQUALITIES\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.676404,
+          "target_id": "119.14",
+          "target_text": "Theme: Equality & non-discrimination\nRecommendation and recommending State: 119.14 Take measures to protect migrants, people of African descent and other minorities from discrimination (Algeria);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Equality & non-discrimination\nGroups of Persons: \n- Migrants\n- People of African Descent\n- Minorities/ racial, ethnic, linguistic, religious or descent-based groups\nRelevant SDGs: - 10 - REDUCED INEQUALITIES\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.657903,
+          "target_id": "119.16",
+          "target_text": "Theme: Equality & non-discrimination\nRecommendation and recommending State: 119.16 Strengthen measures to protect Indigenous groups, people of African descent and other minority groups from discrimination (Burundi);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Equality & non-discrimination\nGroups of Persons: \n- Indigenous peoples\n- People of African Descent\n- Minorities/ racial, ethnic, linguistic, religious or descent-based groups\nRelevant SDGs: - 10 - REDUCED INEQUALITIES\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.657023,
+          "target_id": "120.126",
+          "target_text": "Theme: Equality & non-discrimination\nRecommendation and recommending State: 120.126 Strengthen internal legislative and operational measures to promote and protect the rights of vulnerable groups of the population, with an emphasis on Indigenous Peoples, Afro-descendants, refugee children and asylum-seekers, guaranteeing better access to justice and education, the physical integrity of Indigenous leaders, as well as all the protection of the human rights of the defenders of the rights of Indigenous communities (Cabo Verde).\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Equality & non-discrimination\n- Human rights defenders\n- Right to physical & moral integrity\n- Legal & institutional reform\n- Right to education\nGroups of Persons: \n- Refugees & asylum seekers\n- Children\n- Indigenous peoples\n- People of African Descent\n- Vulnerable persons/groups\n- Minorities/ racial, ethnic, linguistic, religious"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.644149,
+          "target_id": "119.151",
+          "target_text": "Theme: Equality & non-discrimination\nRecommendation and recommending State: 119.151 Address persistent violations of the rights of minority groups, including discrimination and hate speech, especially on social networks, targeting Indigenous groups and people of African descent (Azerbaijan);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Equality & non-discrimination\n- Racial discrimination\nGroups of Persons: \n- Indigenous peoples\n- People of African Descent\n- Minorities/ racial, ethnic, linguistic, religious or descent-based groups\nRelevant SDGs: - 10 - REDUCED INEQUALITIES\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.642148,
+          "target_id": "119.19",
+          "target_text": "Theme: Equality & non-discrimination\nRecommendation and recommending State: 119.19 Combat stigmatizing, discriminatory, xenophobic and violent discourse against the migrant population (Mexico);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Equality & non-discrimination\n- Racial discrimination\nGroups of Persons: \n- Migrants\n- Minorities/ racial, ethnic, linguistic, religious or descent-based groups\nRelevant SDGs: - 10 - REDUCED INEQUALITIES\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.631896,
+          "target_id": "119.155",
+          "target_text": "Theme: Migrants\nRecommendation and recommending State: 119.155 Increase efforts to improve the situation of socially vulnerable groups, especially migrants, including their protection from discrimination (Russian Federation);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Migrants\n- Equality & non-discrimination\nGroups of Persons: \n- Migrants\n- Vulnerable persons/groups\nRelevant SDGs: - 10 - REDUCED INEQUALITIES\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.630896,
+          "target_id": "119.20",
+          "target_text": "Theme: Equality & non-discrimination\nRecommendation and recommending State: 119.20 Redouble efforts to prevent situations of discrimination against migrants, asylum-seekers and refugees (Ecuador);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Equality & non-discrimination\nGroups of Persons: \n- Refugees & asylum seekers\n- Migrants\nRelevant SDGs: - 10 - REDUCED INEQUALITIES\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.62574,
+          "target_id": "119.17",
+          "target_text": "Theme: Equality & non-discrimination\nRecommendation and recommending State: 119.17 Strengthen efforts to combat hate speech, racial discrimination and xenophobia (Bahrain);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Equality & non-discrimination\n- Racial discrimination\nGroups of Persons: \n- Indigenous peoples\n- Migrants\n- Minorities/ racial, ethnic, linguistic, religious or descent-based groups\nRelevant SDGs: - 10 - REDUCED INEQUALITIES\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        }
+      ],
+      "costa_rica_2024:discrimination:2": [
+        {
+          "reranker_score": null,
+          "score": 0.616286,
+          "target_id": "119.112",
+          "target_text": "Theme: Equality & non-discrimination\nRecommendation and recommending State: 119.112 Reinforce the measures to eliminate discriminatory gender stereotypes and continue the implementation of the Action Plan of the National Policy for Effective Equality between Women and Men (Republic of Moldova);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Equality & non-discrimination\n- Advancement of women\n- National Human Rights Action Plans (or specific areas) / implementation plans\n- Discrimination against women\nGroups of Persons: \n- Women & girls\nRelevant SDGs: - 5 - GENDER EQUALITY"
+        }
+      ],
+      "costa_rica_2024:discrimination:3": [
+        {
+          "reranker_score": null,
+          "score": 0.607414,
+          "target_id": "119.138",
+          "target_text": "Theme: Persons with disabilities: independence, inclusion\nRecommendation and recommending State: 119.138 Promote and protect the rights of persons with disabilities to ensure their full integration and participation in society (Egypt);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Persons with disabilities: independence, inclusion\n- Persons with disabilities: accessibility, mobility\n- Persons with disabilities: protecting the integrity of the person\nGroups of Persons: \n- Persons with disabilities\nRelevant SDGs: - 10 - REDUCED INEQUALITIES"
+        }
+      ],
+      "costa_rica_2024:right_to_education:1": [],
+      "costa_rica_2024:right_to_education:2": [],
+      "costa_rica_2024:right_to_education:3": [
+        {
+          "reranker_score": null,
+          "score": 0.72985,
+          "target_id": "120.72",
+          "target_text": "Theme: Right to education\nRecommendation and recommending State: 120.72 Implement a targeted financing plan to improve access to equal and inclusive quality education and to reduce dropout rates among migrant, rural and financially disadvantaged students, particularly in remote areas (Portugal);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Right to education\n- Equality & non-discrimination\n- Budget & resources (for human rights implementation)\nGroups of Persons: \n- Migrants\n- Persons living in rural areas\nRelevant SDGs: - 4 - QUALITY EDUCATION"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.653961,
+          "target_id": "120.75",
+          "target_text": "Theme: Right to education\nRecommendation and recommending State: 120.75 Strengthen its efforts to reduce school dropout rates, which may include providing resources and funding to students and educational institutions, particularly those in the area with social vulnerability (Thailand);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Right to education\n- Budget & resources (for human rights implementation)\nGroups of Persons: \n- Vulnerable persons/groups\nRelevant SDGs: - 4 - QUALITY EDUCATION"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.652631,
+          "target_id": "119.92",
+          "target_text": "Theme: Right to education\nRecommendation and recommending State: 119.92 Strengthen its measures to address gaps in school enrolment of children in rural and coastal areas, Indigenous children, children of African descent, children with disabilities and migrant children, and to lower school dropout rates (Azerbaijan);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Right to education\nGroups of Persons: \n- Children\n- Indigenous peoples\n- People of African Descent\n- Persons living in rural areas\n- Persons with disabilities\nRelevant SDGs: - 4 - QUALITY EDUCATION"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.650859,
+          "target_id": "119.99",
+          "target_text": "Theme: Right to education\nRecommendation and recommending State: 119.99 Implement a comprehensive policy to address school dropout rates in rural areas and among boys through community-based interventions or educational campaigns (Malaysia);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Right to education\n- Equality & non-discrimination\nGroups of Persons: \n- Children\n- Persons living in rural areas\nRelevant SDGs: - 4 - QUALITY EDUCATION"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.647281,
+          "target_id": "119.97",
+          "target_text": "Theme: Right to education\nRecommendation and recommending State: 119.97 Work to address existing gaps in school enrolment rates for children in rural and coastal areas, as well as children with disabilities, with the aim of reducing school dropout rates (Jordan);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Right to education\nGroups of Persons: \n- Children\n- Persons living in rural areas\n- Persons with disabilities\nRelevant SDGs: - 4 - QUALITY EDUCATION"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.633969,
+          "target_id": "120.74",
+          "target_text": "Theme: Right to education\nRecommendation and recommending State: 120.74 Increase financial and human resources to address school dropout and gaps in school enrolment (Lebanon);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Right to education\n- Budget & resources (for human rights implementation)\nRelevant SDGs: - 4 - QUALITY EDUCATION"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.609775,
+          "target_id": "119.98",
+          "target_text": "Theme: Right to education\nRecommendation and recommending State: 119.98 Take measures to reduce school dropout rates (Côte d'Ivoire);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Right to education\nGroups of Persons: \n- Children\nRelevant SDGs: - 4 - QUALITY EDUCATION"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.609219,
+          "target_id": "119.95",
+          "target_text": "Theme: Right to education\nRecommendation and recommending State: 119.95 Enhance outreach and support to increase the participation of adolescents in education, especially in poorer households (Slovenia);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Right to education\n- Equality & non-discrimination\nGroups of Persons: \n- Persons living in poverty\n- Youth & juveniles\nRelevant SDGs: - 4 - QUALITY EDUCATION"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.600497,
+          "target_id": "119.94",
+          "target_text": "Theme: Right to education\nRecommendation and recommending State: 119.94 Further enhance access to quality education of children in rural areas and Indigenous communities, as well as those with disabilities and from migrant backgrounds (Philippines);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Right to education\n- Equality & non-discrimination\nGroups of Persons: \n- Children\n- Indigenous peoples\n- Persons living in rural areas\nRelevant SDGs: - 4 - QUALITY EDUCATION"
+        }
+      ],
+      "costa_rica_2024:right_to_education:4": [],
+      "costa_rica_2024:right_to_education:5": [],
+      "costa_rica_2024:right_to_health:1": [
+        {
+          "reranker_score": null,
+          "score": 0.638625,
+          "target_id": "120.102",
+          "target_text": "Theme: Right to health\nRecommendation and recommending State: 120.102 Consider developing a national plan for the early detection and treatment of life-threatening conditions in children, and step up awareness campaigns for children and adolescents on the harms of drug use (Mongolia);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Noted\nHuman rights themes and groups of persons: - Right to health\n- National Human Rights Action Plans (or specific areas) / implementation plans\n- Children: definition; general principles; protection\nGroups of Persons: \n- Children\n- Youth & juveniles\nRelevant SDGs: - 3 - GOOD HEALTH AND WELL-BEING\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        }
+      ],
+      "costa_rica_2024:right_to_health:2": [],
+      "costa_rica_2024:right_to_health:3": [],
+      "costa_rica_2024:right_to_health:4": [],
+      "costa_rica_2024:right_to_health:5": [
+        {
+          "reranker_score": null,
+          "score": 0.619974,
+          "target_id": "120.65",
+          "target_text": "Theme: Right to health\nRecommendation and recommending State: 120.65 Adopt a strategy focused on suicide prevention (Côte d'Ivoire);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Right to health\n- Right to life\nRelevant SDGs: - 3 - GOOD HEALTH AND WELL-BEING"
+        }
+      ],
+      "costa_rica_2024:sexual_exploitation_and_trafficking:1": [],
+      "costa_rica_2024:sexual_exploitation_and_trafficking:2": [],
+      "costa_rica_2024:sexual_exploitation_and_trafficking:3": [
+        {
+          "reranker_score": null,
+          "score": 0.651631,
+          "target_id": "119.57",
+          "target_text": "Theme: Human trafficking & contemporary forms of slavery\nRecommendation and recommending State: 119.57 Strengthen measures to investigate and prosecute offences related to trafficking in persons and improve mechanisms for victim protection (Uzbekistan);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Human trafficking & contemporary forms of slavery\n- Rule of law & impunity\n- Access to justice & remedy\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 8 - DECENT WORK AND ECONOMIC GROWTH\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.624903,
+          "target_id": "119.60",
+          "target_text": "Theme: Human trafficking & contemporary forms of slavery\nRecommendation and recommending State: 119.60 Further strengthen the mechanisms and institutions responsible for combating trafficking in persons, by placing greater emphasis on prevention and protection of victims, and allocate human and financial resources to the implementation of the National Policy against Trafficking in Persons (2020–2030) (Djibouti);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Human trafficking & contemporary forms of slavery\n- Legal & institutional reform\n- Budget & resources (for human rights implementation)\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 8 - DECENT WORK AND ECONOMIC GROWTH\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.620764,
+          "target_id": "119.56",
+          "target_text": "Theme: Human trafficking & contemporary forms of slavery\nRecommendation and recommending State: 119.56 Continue efforts aimed at protecting victims of human trafficking (Bulgaria);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Human trafficking & contemporary forms of slavery\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 8 - DECENT WORK AND ECONOMIC GROWTH\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.616963,
+          "target_id": "119.61",
+          "target_text": "Theme: Human trafficking & contemporary forms of slavery\nRecommendation and recommending State: 119.61 Continue efforts to strengthen the functioning of the National Coalition against the Smuggling of Migrants and Trafficking in Persons and strengthen institutional capacities for State intervention in the care and protection of victims, based on the recommendations accepted in the third cycle (Honduras);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Human trafficking & contemporary forms of slavery\nGroups of Persons: \n- Migrants\nRelevant SDGs: - 8 - DECENT WORK AND ECONOMIC GROWTH\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.603259,
+          "target_id": "119.59",
+          "target_text": "Theme: Human trafficking & contemporary forms of slavery\nRecommendation and recommending State: 119.59 Strengthen programmes to prevent, combat and punish trafficking in persons and sexual exploitation, and intensify awareness-raising and sensitization measures, as well as access to justice and support services for victims (Paraguay);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Human trafficking & contemporary forms of slavery\n- Support to victims & witnesses\n- Human rights education, trainings & awareness raising\n- Access to justice & remedy\n- Sexual & gender-based violence\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 8 - DECENT WORK AND ECONOMIC GROWTH\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        }
+      ],
+      "costa_rica_2024:transport_and_infrastructure:1": [],
+      "costa_rica_2024:transport_and_infrastructure:2": [],
+      "costa_rica_2024:transport_and_infrastructure:3": [],
+      "costa_rica_2024:violence_against_children:1": [
+        {
+          "reranker_score": null,
+          "score": 0.641532,
+          "target_id": "119.129",
+          "target_text": "Theme: Sexual & gender-based violence\nRecommendation and recommending State: 119.129 Take additional steps to implement Act No. 9406, to enhance legal protection for girls and adolescent women associated with abusive relationships and to help tackle the recent surge in domestic violence (United Kingdom of Great Britain and Northern Ireland);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Sexual & gender-based violence\n- Violence against women\nGroups of Persons: \n- Youth & juveniles\n- Women & girls\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.639677,
+          "target_id": "120.91",
+          "target_text": "Theme: Sexual & gender-based violence\nRecommendation and recommending State: 120.91 Take effective steps to ensure that all cases of gender-based violence are thoroughly investigated, alleged perpetrators are brought to justice and victims receive redress, including through strengthening the Department on Gender-based Violence of the National Institute for Women (Azerbaijan);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Sexual & gender-based violence\n- Violence against women\n- Rule of law & impunity\n- Support to victims & witnesses\nGroups of Persons: \n- Women & girls\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.629811,
+          "target_id": "120.90",
+          "target_text": "Theme: Sexual & gender-based violence\nRecommendation and recommending State: 120.90 Continue efforts to ensure that all cases of sexual and gender-based violence against women and girls are thoroughly investigated and the alleged perpetrators are brought to justice (Lithuania);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Sexual & gender-based violence\n- Violence against women\n- Rule of law & impunity\nGroups of Persons: \n- Women & girls\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.61929,
+          "target_id": "119.124",
+          "target_text": "Theme: Liberty & security of the person\nRecommendation and recommending State: 119.124 Strengthen mechanisms to address violence in all its forms and manifestations, including that arising from crime and other social, economic and institutional challenges (Cuba);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Liberty & security of the person\nRelevant SDGs: - 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.610893,
+          "target_id": "120.96",
+          "target_text": "Theme: Sexual & gender-based violence\nRecommendation and recommending State: 120.96 Implement support programmes for victims of sexual violence, including access to justice and psychological support during and after judicial proceedings (Thailand);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Sexual & gender-based violence\n- Administration of justice & fair trial\n- Support to victims & witnesses\n- Access to justice & remedy\nGroups of Persons: \n- Women & girls\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.607757,
+          "target_id": "120.89",
+          "target_text": "Theme: Sexual & gender-based violence\nRecommendation and recommending State: 120.89 Ensure that all instances of gender-based violence are thoroughly investigated and the alleged perpetrators are brought to justice (Cyprus);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Sexual & gender-based violence\n- Violence against women\n- Rule of law & impunity\nGroups of Persons: \n- Women & girls\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.607297,
+          "target_id": "120.92",
+          "target_text": "Theme: Sexual & gender-based violence\nRecommendation and recommending State: 120.92 Speed up the implementation of prevention mechanisms in combating gender-based violence and guarantee the necessary resources for the comprehensive implementation of the Violence against Women Act and the act establishing the notion of extended femicide (Spain);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Sexual & gender-based violence\n- Violence against women\n- Budget & resources (for human rights implementation)\nGroups of Persons: \n- Women & girls\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.603073,
+          "target_id": "120.93",
+          "target_text": "Theme: Sexual & gender-based violence\nRecommendation and recommending State: 120.93 Strengthen measures to combat gender-based violence by increasing funding to support services, particularly in rural areas, and improving law enforcement training to handle these cases effectively (Gambia);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Sexual & gender-based violence\n- Violence against women\n- Budget & resources (for human rights implementation)\nGroups of Persons: \n- Law enforcement / police & prison officials\n- Persons living in rural areas\n- Women & girls\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.600978,
+          "target_id": "119.131",
+          "target_text": "Theme: Violence against women\nRecommendation and recommending State: 119.131 Continue its efforts to tackle violence against women, especially by strengthening victim support services, in particular in remote rural and border areas (Poland);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Violence against women\n- Access to justice & remedy\n- Sexual & gender-based violence\nGroups of Persons: \n- Persons living in rural areas\n- Women & girls\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        }
+      ],
+      "costa_rica_2024:violence_against_children:2": [],
+      "costa_rica_2024:violence_against_children:3": [
+        {
+          "reranker_score": null,
+          "score": 0.612908,
+          "target_id": "119.121",
+          "target_text": "Theme: Violence against women\nRecommendation and recommending State: 119.121 Enhance measures to prevent and address all forms of violence, including gender-based violence, particularly in remote areas (Viet Nam);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Violence against women\n- Sexual & gender-based violence\nGroups of Persons: \n- Women & girls\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.607613,
+          "target_id": "119.124",
+          "target_text": "Theme: Liberty & security of the person\nRecommendation and recommending State: 119.124 Strengthen mechanisms to address violence in all its forms and manifestations, including that arising from crime and other social, economic and institutional challenges (Cuba);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Liberty & security of the person\nRelevant SDGs: - 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.603425,
+          "target_id": "120.92",
+          "target_text": "Theme: Sexual & gender-based violence\nRecommendation and recommending State: 120.92 Speed up the implementation of prevention mechanisms in combating gender-based violence and guarantee the necessary resources for the comprehensive implementation of the Violence against Women Act and the act establishing the notion of extended femicide (Spain);\nSource of Position: A/HRC/58/13/Add.1 - Para.8\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Sexual & gender-based violence\n- Violence against women\n- Budget & resources (for human rights implementation)\nGroups of Persons: \n- Women & girls\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 16 - PEACE, JUSTICE AND STRONG INSTITUTIONS"
+        }
+      ],
+      "costa_rica_2024:violence_against_children:4": [],
+      "costa_rica_2024:young_peoples_rights:1": [
+        {
+          "reranker_score": null,
+          "score": 0.664511,
+          "target_id": "119.69",
+          "target_text": "Theme: Labour rights and right to work\nRecommendation and recommending State: 119.69 Take measures to increase youth employment opportunities and to ensure non-discriminatory and adequate conditions to access the labour market by all those in search of a job (Romania);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Labour rights and right to work\n- Equality & non-discrimination\nGroups of Persons: \n- Youth & juveniles\nRelevant SDGs: - 8 - DECENT WORK AND ECONOMIC GROWTH"
+        },
+        {
+          "reranker_score": null,
+          "score": 0.626726,
+          "target_id": "119.68",
+          "target_text": "Theme: Labour rights and right to work\nRecommendation and recommending State: 119.68 Incorporate a gender, youth and social inclusion perspective in the development of the National Employment Policy and continue to improve labour market programmes and employment services (Panama);\nSource of Position: A/HRC/58/13\nPosition of the State under review: Supported\nHuman rights themes and groups of persons: - Labour rights and right to work\n- Equality & non-discrimination\nGroups of Persons: \n- Youth & juveniles\n- Women & girls\nRelevant SDGs: - 5 - GENDER EQUALITY\n- 8 - DECENT WORK AND ECONOMIC GROWTH\n- 10 - REDUCED INEQUALITIES"
+        }
+      ],
+      "costa_rica_2024:young_peoples_rights:2": [],
+      "costa_rica_2024:young_peoples_rights:3": [],
+      "costa_rica_2024:young_peoples_rights:4": []
+    }
+  },
+  "settings": {
+    "candidate_top_k": 10,
+    "embedding_model": "qwen/qwen3-embedding-8b",
+    "embedding_provider": "openrouter",
+    "limit_sources": 0,
+    "limit_targets": 0,
+    "match_threshold": 0.6,
+    "openrouter_model": "deepseek/deepseek-v4-flash",
+    "reranker_model": "cohere/rerank-4-pro",
+    "reranker_provider": "openrouter",
+    "reranker_top_k": 10,
+    "skip_reranker": true,
+    "source_language": "en",
+    "source_mode": "gold"
+  },
+  "timings_seconds": {
+    "reference_doc_row_extraction": 0.41,
+    "reference_embedding": 36.157,
+    "reference_text_extraction": 0.386,
+    "semantic_candidate_matching": 5.871,
+    "source_embedding": 1.873,
+    "source_pdf_text_extraction": 0.634
+  }
+}

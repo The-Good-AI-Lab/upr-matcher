@@ -1,0 +1,422 @@
+{
+  "commands": [
+    {
+      "command": [
+        "/home/arthur/Documents/gail/upr-matcher/backend/.venv/bin/python3",
+        "/home/arthur/Documents/gail/upr-matcher/evals/tools/build_candidate_labeling_queue.py",
+        "--trace",
+        "/home/arthur/Documents/gail/upr-matcher/evals/traces/live/costa_rica_parser_regression_es_gold.json",
+        "--trace",
+        "/home/arthur/Documents/gail/upr-matcher/evals/traces/live/costa_rica_parser_regression_en_gold.json"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "wrote 540 blinded candidate rows to /home/arthur/Documents/gail/upr-matcher/evals/labeling/costa_rica_candidate_pairs.jsonl\nwrote 540 enriched candidate rows to /home/arthur/Documents/gail/upr-matcher/evals/labeling/costa_rica_candidate_pairs_with_gold.jsonl\nexisting positive gold labels attached in enriched output: 69\nwrote 111 missed gold rows to /home/arthur/Documents/gail/upr-matcher/evals/labeling/costa_rica_missing_gold_pairs.jsonl\n"
+    },
+    {
+      "command": [
+        "/home/arthur/Documents/gail/upr-matcher/backend/.venv/bin/python3",
+        "/home/arthur/Documents/gail/upr-matcher/evals/tools/summarize_candidate_labels.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "wrote report to /home/arthur/Documents/gail/upr-matcher/evals/reports/costa_rica_candidate_label_metrics.md\n"
+    },
+    {
+      "command": [
+        "/home/arthur/Documents/gail/upr-matcher/backend/.venv/bin/python3",
+        "/home/arthur/Documents/gail/upr-matcher/evals/tools/evaluate_reranker_lift.py",
+        "--report",
+        "/home/arthur/Documents/gail/upr-matcher/evals/reports/reranker_lift.md",
+        "--json-output",
+        "/home/arthur/Documents/gail/upr-matcher/evals/reports/reranker_lift.json"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "wrote report to /home/arthur/Documents/gail/upr-matcher/evals/reports/reranker_lift.md\nwrote json to /home/arthur/Documents/gail/upr-matcher/evals/reports/reranker_lift.json\n"
+    },
+    {
+      "command": [
+        "/home/arthur/Documents/gail/upr-matcher/backend/.venv/bin/python3",
+        "/home/arthur/Documents/gail/upr-matcher/evals/tools/evaluate_final_match_quality.py",
+        "--max-rank",
+        "10",
+        "--report",
+        "/home/arthur/Documents/gail/upr-matcher/evals/reports/costa_rica_final_match_quality.md",
+        "--json-output",
+        "/home/arthur/Documents/gail/upr-matcher/evals/reports/costa_rica_final_match_quality.json"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "wrote report to /home/arthur/Documents/gail/upr-matcher/evals/reports/costa_rica_final_match_quality.md\nwrote json to /home/arthur/Documents/gail/upr-matcher/evals/reports/costa_rica_final_match_quality.json\n"
+    },
+    {
+      "command": [
+        "/home/arthur/Documents/gail/upr-matcher/backend/.venv/bin/python3",
+        "/home/arthur/Documents/gail/upr-matcher/evals/tools/compare_embedding_models.py",
+        "--candidate-top-k",
+        "10",
+        "--trace-root",
+        "/home/arthur/Documents/gail/upr-matcher/evals/traces/live",
+        "--report-root",
+        "/home/arthur/Documents/gail/upr-matcher/evals/reports/live",
+        "--report",
+        "/home/arthur/Documents/gail/upr-matcher/evals/reports/embedding_model_sweep.md",
+        "--json-output",
+        "/home/arthur/Documents/gail/upr-matcher/evals/reports/embedding_model_sweep.json",
+        "--embedding-model",
+        "qwen/qwen3-embedding-8b",
+        "--embedding-model",
+        "openai/text-embedding-3-small",
+        "--embedding-provider",
+        "openrouter",
+        "--dry-run"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "wrote report to /home/arthur/Documents/gail/upr-matcher/evals/reports/embedding_model_sweep.md\nwrote json to /home/arthur/Documents/gail/upr-matcher/evals/reports/embedding_model_sweep.json\n"
+    }
+  ],
+  "created_at": "2026-06-16T19:30:34.551235+00:00",
+  "embedding_model_sweep": {
+    "commands": [
+      {
+        "command": [
+          "/home/arthur/Documents/gail/upr-matcher/backend/.venv/bin/python3",
+          "/home/arthur/Documents/gail/upr-matcher/evals/tools/run_ai_pipeline_eval.py",
+          "--source-mode",
+          "gold",
+          "--source-language",
+          "es",
+          "--candidate-top-k",
+          "10",
+          "--skip-reranker",
+          "--run-id",
+          "embedding_sweep_20260616T193034Z_329c2615_qwen_qwen3_embedding_8b_es",
+          "--trace-root",
+          "/home/arthur/Documents/gail/upr-matcher/evals/traces/live",
+          "--report-root",
+          "/home/arthur/Documents/gail/upr-matcher/evals/reports/live"
+        ],
+        "env_overrides": {
+          "EMBEDDING_MODEL": "qwen/qwen3-embedding-8b",
+          "EMBEDDING_PROVIDER": "openrouter"
+        },
+        "returncode": null,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "command": [
+          "/home/arthur/Documents/gail/upr-matcher/backend/.venv/bin/python3",
+          "/home/arthur/Documents/gail/upr-matcher/evals/tools/run_ai_pipeline_eval.py",
+          "--source-mode",
+          "gold",
+          "--source-language",
+          "en",
+          "--candidate-top-k",
+          "10",
+          "--skip-reranker",
+          "--run-id",
+          "embedding_sweep_20260616T193034Z_329c2615_qwen_qwen3_embedding_8b_en",
+          "--trace-root",
+          "/home/arthur/Documents/gail/upr-matcher/evals/traces/live",
+          "--report-root",
+          "/home/arthur/Documents/gail/upr-matcher/evals/reports/live"
+        ],
+        "env_overrides": {
+          "EMBEDDING_MODEL": "qwen/qwen3-embedding-8b",
+          "EMBEDDING_PROVIDER": "openrouter"
+        },
+        "returncode": null,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "command": [
+          "/home/arthur/Documents/gail/upr-matcher/backend/.venv/bin/python3",
+          "/home/arthur/Documents/gail/upr-matcher/evals/tools/run_ai_pipeline_eval.py",
+          "--source-mode",
+          "gold",
+          "--source-language",
+          "es",
+          "--candidate-top-k",
+          "10",
+          "--skip-reranker",
+          "--run-id",
+          "embedding_sweep_20260616T193034Z_329c2615_openai_text_embedding_3_small_es",
+          "--trace-root",
+          "/home/arthur/Documents/gail/upr-matcher/evals/traces/live",
+          "--report-root",
+          "/home/arthur/Documents/gail/upr-matcher/evals/reports/live"
+        ],
+        "env_overrides": {
+          "EMBEDDING_MODEL": "openai/text-embedding-3-small",
+          "EMBEDDING_PROVIDER": "openrouter"
+        },
+        "returncode": null,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "command": [
+          "/home/arthur/Documents/gail/upr-matcher/backend/.venv/bin/python3",
+          "/home/arthur/Documents/gail/upr-matcher/evals/tools/run_ai_pipeline_eval.py",
+          "--source-mode",
+          "gold",
+          "--source-language",
+          "en",
+          "--candidate-top-k",
+          "10",
+          "--skip-reranker",
+          "--run-id",
+          "embedding_sweep_20260616T193034Z_329c2615_openai_text_embedding_3_small_en",
+          "--trace-root",
+          "/home/arthur/Documents/gail/upr-matcher/evals/traces/live",
+          "--report-root",
+          "/home/arthur/Documents/gail/upr-matcher/evals/reports/live"
+        ],
+        "env_overrides": {
+          "EMBEDDING_MODEL": "openai/text-embedding-3-small",
+          "EMBEDDING_PROVIDER": "openrouter"
+        },
+        "returncode": null,
+        "stderr": "",
+        "stdout": ""
+      }
+    ],
+    "created_at": "2026-06-16T19:30:34.543061+00:00",
+    "dry_run": true,
+    "language_gaps": [],
+    "rows": [],
+    "run_prefix": "embedding_sweep_20260616T193034Z_329c2615"
+  },
+  "extraction_stability": null,
+  "final_match_quality": {
+    "by_language": {
+      "en-en": {
+        "all_decisive_candidate_rows": 0,
+        "all_relevant_candidate_rows": 0,
+        "candidate_rows": 270,
+        "f1": null,
+        "missing_gold_rows": 45,
+        "precision": null,
+        "recall": null,
+        "recall_denominator": null,
+        "recall_denominator_ready": false,
+        "selected_decisive_rows": 0,
+        "selected_relevant_rows": 0,
+        "selected_rows": 270,
+        "selected_unlabeled_or_unclear_rows": 270,
+        "unlabeled_or_unclear_candidate_rows": 270
+      },
+      "es-en": {
+        "all_decisive_candidate_rows": 0,
+        "all_relevant_candidate_rows": 0,
+        "candidate_rows": 270,
+        "f1": null,
+        "missing_gold_rows": 66,
+        "precision": null,
+        "recall": null,
+        "recall_denominator": null,
+        "recall_denominator_ready": false,
+        "selected_decisive_rows": 0,
+        "selected_relevant_rows": 0,
+        "selected_rows": 270,
+        "selected_unlabeled_or_unclear_rows": 270,
+        "unlabeled_or_unclear_candidate_rows": 270
+      }
+    },
+    "overall": {
+      "all_decisive_candidate_rows": 0,
+      "all_relevant_candidate_rows": 0,
+      "candidate_rows": 540,
+      "f1": null,
+      "missing_gold_rows": 111,
+      "precision": null,
+      "recall": null,
+      "recall_denominator": null,
+      "recall_denominator_ready": false,
+      "selected_decisive_rows": 0,
+      "selected_relevant_rows": 0,
+      "selected_rows": 540,
+      "selected_unlabeled_or_unclear_rows": 540,
+      "unlabeled_or_unclear_candidate_rows": 540
+    },
+    "policy": {
+      "max_rank": 10,
+      "min_semantic_score": null
+    },
+    "selected_false_positive_categories": {}
+  },
+  "gate_status": [
+    {
+      "stage": "Source extraction",
+      "status": "not run in this suite; opt in with OpenRouter"
+    },
+    {
+      "stage": "Semantic retrieval",
+      "status": "baseline metrics available for es-en and en-en"
+    },
+    {
+      "stage": "Embedding model sweep",
+      "status": "dry run"
+    },
+    {
+      "stage": "Candidate precision",
+      "status": "blocked on human labels"
+    },
+    {
+      "stage": "Reranker",
+      "status": "lift report generated"
+    },
+    {
+      "stage": "Final match quality",
+      "status": "metrics blocked on labels"
+    },
+    {
+      "stage": "LLM judge validation",
+      "status": "blocked until enough human pass/fail labels exist"
+    }
+  ],
+  "labels": {
+    "by_language": {
+      "en-en": {
+        "labeled": 0,
+        "rows": 270
+      },
+      "es-en": {
+        "labeled": 0,
+        "rows": 270
+      }
+    },
+    "candidate_rows": 540,
+    "decisive_rows": 0,
+    "labeled_rows": 0,
+    "missing_gold_reviewed": 0,
+    "missing_gold_rows": 111,
+    "precision": null,
+    "relevant_rows": 0
+  },
+  "language_gap": {
+    "mrr": 0.3517,
+    "ndcg@10": 0.2737,
+    "recall@10": 0.276
+  },
+  "reranker_lift": [
+    {
+      "candidate_top_k": 10,
+      "case_id": "costa_rica_2024",
+      "delta_hit@10": -0.3333,
+      "delta_mrr": -0.1509,
+      "delta_ndcg@10": -0.2032,
+      "delta_precision@10": 0.213,
+      "delta_recall@10": -0.3243,
+      "evaluated_sources": 18,
+      "language_pair": "en-en",
+      "reranked_hit@10": 0.6111,
+      "reranked_mrr": 0.5463,
+      "reranked_ndcg@10": 0.3751,
+      "reranked_precision@10": 0.463,
+      "reranked_recall@10": 0.3239,
+      "reranker_top_k": 5,
+      "run_id": "costa_rica_labeled_en_full",
+      "semantic_hit@10": 0.9444,
+      "semantic_mrr": 0.6972,
+      "semantic_ndcg@10": 0.5783,
+      "semantic_precision@10": 0.25,
+      "semantic_recall@10": 0.6482,
+      "source_mode": "gold",
+      "trace_path": "/home/arthur/Documents/gail/upr-matcher/evals/traces/live/costa_rica_labeled_en_full.json"
+    },
+    {
+      "candidate_top_k": 10,
+      "case_id": "costa_rica_2024",
+      "delta_hit@10": -0.2222,
+      "delta_mrr": -0.0103,
+      "delta_ndcg@10": -0.0708,
+      "delta_precision@10": 0.0334,
+      "delta_recall@10": -0.1196,
+      "evaluated_sources": 18,
+      "language_pair": "es-en",
+      "reranked_hit@10": 0.5556,
+      "reranked_mrr": 0.3352,
+      "reranked_ndcg@10": 0.2338,
+      "reranked_precision@10": 0.1667,
+      "reranked_recall@10": 0.2526,
+      "reranker_top_k": 5,
+      "run_id": "costa_rica_labeled_es_full",
+      "semantic_hit@10": 0.7778,
+      "semantic_mrr": 0.3455,
+      "semantic_ndcg@10": 0.3046,
+      "semantic_precision@10": 0.1333,
+      "semantic_recall@10": 0.3722,
+      "source_mode": "both",
+      "trace_path": "/home/arthur/Documents/gail/upr-matcher/evals/traces/live/costa_rica_labeled_es_full.json"
+    },
+    {
+      "candidate_top_k": 10,
+      "case_id": "costa_rica_2024",
+      "delta_hit@10": -0.3333,
+      "delta_mrr": -0.3333,
+      "delta_ndcg@10": -0.3259,
+      "delta_precision@10": 0.3334,
+      "delta_recall@10": -0.348,
+      "evaluated_sources": 3,
+      "language_pair": "en-en",
+      "reranked_hit@10": 0.6667,
+      "reranked_mrr": 0.6667,
+      "reranked_ndcg@10": 0.2392,
+      "reranked_precision@10": 0.6667,
+      "reranked_recall@10": 0.15,
+      "reranker_top_k": 5,
+      "run_id": "offline_smoke_reranker_en",
+      "semantic_hit@10": 1.0,
+      "semantic_mrr": 1.0,
+      "semantic_ndcg@10": 0.5651,
+      "semantic_precision@10": 0.3333,
+      "semantic_recall@10": 0.498,
+      "source_mode": "gold",
+      "trace_path": "/home/arthur/Documents/gail/upr-matcher/evals/traces/live/offline_smoke_reranker_en.json"
+    }
+  ],
+  "retrieval_baselines": [
+    {
+      "case_id": "costa_rica_2024",
+      "gold_links_evaluated": 90,
+      "gold_sources_evaluated": 18,
+      "gold_target_id_coverage": 1.0,
+      "gold_target_id_text_coverage": 1.0,
+      "hit@10": 0.7778,
+      "language_pair": "es-en",
+      "mrr": 0.3455,
+      "ndcg@10": 0.3046,
+      "precision@10": 0.1333,
+      "recall@10": 0.3722,
+      "reference_rows": 299,
+      "run_id": "costa_rica_parser_regression_es_gold",
+      "source_language": "es",
+      "source_mode": "gold",
+      "trace_path": "/home/arthur/Documents/gail/upr-matcher/evals/traces/live/costa_rica_parser_regression_es_gold.json"
+    },
+    {
+      "case_id": "costa_rica_2024",
+      "gold_links_evaluated": 90,
+      "gold_sources_evaluated": 18,
+      "gold_target_id_coverage": 1.0,
+      "gold_target_id_text_coverage": 1.0,
+      "hit@10": 0.9444,
+      "language_pair": "en-en",
+      "mrr": 0.6972,
+      "ndcg@10": 0.5783,
+      "precision@10": 0.25,
+      "recall@10": 0.6482,
+      "reference_rows": 299,
+      "run_id": "costa_rica_parser_regression_en_gold",
+      "source_language": "en",
+      "source_mode": "gold",
+      "trace_path": "/home/arthur/Documents/gail/upr-matcher/evals/traces/live/costa_rica_parser_regression_en_gold.json"
+    }
+  ],
+  "suite_run_id": "ml_eval_suite_20260616T193034Z_1ee8f8c9"
+}

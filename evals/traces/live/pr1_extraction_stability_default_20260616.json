@@ -1,0 +1,390 @@
+{
+  "aggregate": {
+    "average_best_similarity": {
+      "max": 1.0,
+      "mean": 0.3333,
+      "min": 0.0
+    },
+    "duplicate_recommendation_count": {
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0
+    },
+    "failed_repeats": 2,
+    "gold_coverage_at_threshold": {
+      "max": 1.0,
+      "mean": 0.3333,
+      "min": 0.0
+    },
+    "observed_count": {
+      "max": 28.0,
+      "mean": 9.3333,
+      "min": 0.0
+    },
+    "pairwise_recommendation_jaccard": {
+      "max": 1.0,
+      "mean": 0.3333,
+      "min": 0.0
+    },
+    "repeats_completed": 3,
+    "successful_repeats": 1
+  },
+  "case": {
+    "case_id": "costa_rica_2024",
+    "reference_doc": "/home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/Matrix of recommendations_CostaRica_2024.docx",
+    "reference_file_sha256": "9c94784b1b7271986a7c03c84bdd9d2a725b2563d62d17d817fa2f1c20bc39cf",
+    "source_file_sha256": "2de8b621eced3ad6a46ac6e5040a4fbe8925f35c46c9a24bce18a42a6028a237",
+    "source_pdf": "/home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/2024_UPR Costa Rica.pdf"
+  },
+  "created_at": "2026-06-16T20:53:19.500734+00:00",
+  "openrouter_usage": {
+    "calls": 3,
+    "completion_tokens": 12478,
+    "completion_usd_per_1m": 3.0,
+    "estimated_cost_usd": 0.142374,
+    "max_cost_usd": 10.0,
+    "prompt_tokens": 34980,
+    "prompt_usd_per_1m": 3.0
+  },
+  "repeats": [
+    {
+      "chunks": [
+        {
+          "chunk_chars": 43257,
+          "chunk_index": 1,
+          "completion_tokens": 4284,
+          "prompt_tokens": 11660,
+          "recommendations_count": 28
+        }
+      ],
+      "metrics": {
+        "average_best_similarity": 1.0,
+        "best_by_gold": [
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:discrimination:1"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:discrimination:2"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:discrimination:3"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:right_to_education:1"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:right_to_education:2"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:right_to_education:3"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:right_to_education:4"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:right_to_education:5"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:right_to_health:1"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:right_to_health:2"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:right_to_health:3"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:right_to_health:4"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:right_to_health:5"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:sexual_exploitation_and_trafficking:1"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:sexual_exploitation_and_trafficking:2"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:sexual_exploitation_and_trafficking:3"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:transport_and_infrastructure:1"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:transport_and_infrastructure:2"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:transport_and_infrastructure:3"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:violence_against_children:1"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:violence_against_children:2"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:violence_against_children:3"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:violence_against_children:4"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:young_peoples_rights:1"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:young_peoples_rights:2"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:young_peoples_rights:3"
+          },
+          {
+            "best_similarity": 1.0,
+            "source_id": "costa_rica_2024:young_peoples_rights:4"
+          }
+        ],
+        "duplicate_recommendation_count": 0,
+        "expected_gold_count": 27,
+        "gold_coverage_at_threshold": 1.0,
+        "observed_count": 28,
+        "similarity_threshold": 0.35
+      },
+      "recommendations": [
+        {
+          "beneficiaries": "Students in public schools",
+          "domain": "Right to Education",
+          "recommendation": "Asegurar la calidad de la educación, a través la creación de un plan de financiamiento con el fin de invertir en la mejora de las estructuras educativas públicas.",
+          "theme": "Right to education"
+        },
+        {
+          "beneficiaries": "Teachers",
+          "domain": "Right to Education",
+          "recommendation": "Ofrecer a los docentes de educación primaria y secundaria programas de formación y capacitación para un mejor desempeño en el aula educativa.",
+          "theme": "Right to education"
+        },
+        {
+          "beneficiaries": "Disadvantaged students",
+          "domain": "Right to Education",
+          "recommendation": "Otorgar a los estudiantes de bajos recursos, migrantes, indígenas y los que viven en las zonas rurales un apoyo económico para poder continuar con sus estudios y reducir la tasa de abandono escolar.",
+          "theme": "Right to education"
+        },
+        {
+          "beneficiaries": "Children and youth with fewer resources",
+          "domain": "Right to Education",
+          "recommendation": "Asegurar y agilizar el acceso, especialmente de niños y jóvenes con menos recursos, becas de adquisición de materiales y de comedor escolar.",
+          "theme": "Right to education"
+        },
+        {
+          "beneficiaries": "Children and youth",
+          "domain": "Participation and Empowerment",
+          "recommendation": "Habilitar espacios para que las voces de niños y jóvenes puedan ser escuchadas, especialmente en espacios educativos y sociales.",
+          "theme": "Participation/empowerment"
+        },
+        {
+          "beneficiaries": "Children victims of violence",
+          "domain": "Justice and Security",
+          "recommendation": "Intensificar esfuerzos en el sistema penal y seguimiento de casos de violencia doméstica, sexual y corporal, para agilizar los procesos administrativos.",
+          "theme": "Protection from violence"
+        },
+        {
+          "beneficiaries": "Children and adolescents",
+          "domain": "Justice and Security",
+          "recommendation": "Crear un plan de supervisión en los centros policiacos para evitar la corrupción y o evitación de los casos de violencia especialmente hacia niños, niñas y adolescentes.",
+          "theme": "Protection from violence"
+        },
+        {
+          "beneficiaries": "General public and children",
+          "domain": "Prevention and Awareness",
+          "recommendation": "Redoblar esfuerzos en la creación de campañas de concientización para prevenir y erradicar todo tipo de violencia.",
+          "theme": "Protection from violence"
+        },
+        {
+          "beneficiaries": "General public, especially children",
+          "domain": "Public Safety",
+          "recommendation": "Garantizar, mediante una mayor vigilancia policial, espacios públicos seguros (zonas de ocios, jardines…).",
+          "theme": "Protection from violence"
+        },
+        {
+          "beneficiaries": "Children and adolescents",
+          "domain": "Health and Drug Prevention",
+          "recommendation": "Redoblar esfuerzos en la creación de campañas de concientización sobre el daño perjudicial del consumo de estupefacientes en el país, especialmente dirigidos a niños, niñas y adolescentes.",
+          "theme": "Health, water, food"
+        },
+        {
+          "beneficiaries": "General population",
+          "domain": "Health and Pharmaceutical Control",
+          "recommendation": "Tomar medidas más estrictas sobre la adquisición de medicamentos que requieran prescripción médica.",
+          "theme": "Health, water, food"
+        },
+        {
+          "beneficiaries": "People living with HIV/AIDS",
+          "domain": "Health Data and HIV/AIDS",
+          "recommendation": "Crear un sistema de recopilación de datos más específicos que incluya el tratamiento, seguimiento y número de casos de VIH/SIDA",
+          "theme": "Health, water, food"
+        },
+        {
+          "beneficiaries": "People living with HIV/AIDS",
+          "domain": "Health and Non-Discrimination",
+          "recommendation": "Realizar campañas de concientización para erradicar la estigmatización hacia las personas con VIH/SIDA.",
+          "theme": "No discrimination"
+        },
+        {
+          "beneficiaries": "General population, especially youth",
+          "domain": "Mental Health",
+          "recommendation": "Redoblar esfuerzos en la prevención del suicido mediante campañas de acompañamiento psicológico.",
+          "theme": "Health, water, food"
+        },
+        {
+          "beneficiaries": "Population in remote areas",
+          "domain": "Health Access",
+          "recommendation": "Garantizar el acceso a la salud en las zonas más necesitadas y remotas del país, con un atención ágil y adecuada.",
+          "theme": "Health, water, food"
+        },
+        {
+          "beneficiaries": "Youth",
+          "domain": "Employment and Youth",
+          "recommendation": "Realizar planes nacionales para otorgar mayores oportunidades de empleo para los jóvenes.",
+          "theme": "vocational training/job opportunities"
+        },
+        {
+          "beneficiaries": "Youth without higher education",
+          "domain": "Vocational Training",
+          "recommendation": "Crear planes de capacitación y formación para los jóvenes que no cuentan con educación superior y puedan entrar al mercado laboral.",
+          "theme": "vocational training/job opportunities"
+        },
+        {
+          "beneficiaries": "Youth",
+          "domain": "Drug Prevention",
+          "recommendation": "Crear campañas de concientización del uso de drogas en los jóvenes para evitar su decadencia e introducción a la delincuencia.",
+          "theme": "Health, water, food"
+        },
+        {
+          "beneficiaries": "Youth aspiring to university",
+          "domain": "Higher Education Access",
+          "recommendation": "Aumentar las ayudas a aquellos jóvenes que deseen acceder a la universidad, proporcionando becas de estudios que incluyan alojamiento y alimentación.",
+          "theme": "Right to education"
+        },
+        {
+          "beneficiaries": "Discriminated minorities",
+          "domain": "Non-Discrimination and Protection",
+          "recommendation": "Fomentar un espacio seguro para las minorías discriminadas mediante la creación de centros de denuncia y apoyo para víctimas de todo tipo de discriminación, especialmente a niños, niñas, adolescentes, indígenas, migrantes y mujeres.",
+          "theme": "No discrimination"
+        },
+        {
+          "beneficiaries": "Women and men",
+          "domain": "Gender Equality",
+          "recommendation": "Redoblar esfuerzos en la implementación de su Política Nacional para la Igualdad y la Equidad de Género.",
+          "theme": "No discrimination"
+        },
+        {
+          "beneficiaries": "Persons with disabilities",
+          "domain": "Disability Inclusion",
+          "recommendation": "Fomentar la no discriminación hacia personas con discapacidad, mediante la creación de programas que los ayuden incorporarse en la sociedad de una forma inclusiva, incluyendo la creación de campañas de sensibilización para la sociedad con el objetivo de erradicar su discriminación",
+          "theme": "No discrimination"
+        },
+        {
+          "beneficiaries": "Victims of trafficking",
+          "domain": "Victim Support",
+          "recommendation": "La Creación de centros de rehabilitación psicológica de víctimas de trata con personal capacitado para darle seguimiento a los casos.",
+          "theme": "Human trafficking"
+        },
+        {
+          "beneficiaries": "Victims of trafficking",
+          "domain": "Justice and Anti-Corruption",
+          "recommendation": "Supervisar el seguimiento de las denuncias penales sobre los casos de trata, para evitar el entorpecimiento y la corrupción en la ejecución de los mismos.",
+          "theme": "Human trafficking"
+        },
+        {
+          "beneficiaries": "Victims of trafficking",
+          "domain": "Legal and Policy Framework",
+          "recommendation": "Reforzar las medidas de las leyes y políticas sobre la atención a víctimas de trata.",
+          "theme": "Human trafficking"
+        },
+        {
+          "beneficiaries": "General population",
+          "domain": "Infrastructure and Environment",
+          "recommendation": "Mejorar la infraestructura vial del país.",
+          "theme": "Environment/Climate"
+        },
+        {
+          "beneficiaries": "General population",
+          "domain": "Public Transport",
+          "recommendation": "Implementar un plan de transporte público más amplio y más económico.",
+          "theme": "Environment/Climate"
+        },
+        {
+          "beneficiaries": "General population",
+          "domain": "Sustainable Transport",
+          "recommendation": "Crear sistemas de transporte alternativos y no contaminantes.",
+          "theme": "Environment/Climate"
+        }
+      ],
+      "repeat_index": 1
+    },
+    {
+      "chunks": [],
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "metrics": {
+        "average_best_similarity": 0.0,
+        "best_by_gold": [],
+        "duplicate_recommendation_count": 0,
+        "expected_gold_count": 27,
+        "gold_coverage_at_threshold": 0.0,
+        "observed_count": 0,
+        "similarity_threshold": 0.35
+      },
+      "recommendations": [],
+      "repeat_index": 2
+    },
+    {
+      "chunks": [],
+      "error": "JSONDecodeError: Expecting property name enclosed in double quotes: line 86 column 2 (char 4380)",
+      "metrics": {
+        "average_best_similarity": 0.0,
+        "best_by_gold": [],
+        "duplicate_recommendation_count": 0,
+        "expected_gold_count": 27,
+        "gold_coverage_at_threshold": 0.0,
+        "observed_count": 0,
+        "similarity_threshold": 0.35
+      },
+      "recommendations": [],
+      "repeat_index": 3
+    }
+  ],
+  "run_id": "pr1_extraction_stability_default_20260616",
+  "settings": {
+    "extraction_similarity_threshold": 0.35,
+    "max_chunk_chars": 80000,
+    "max_completion_tokens": 4096,
+    "max_llm_chunks": 1,
+    "openrouter_model": "deepseek/deepseek-v4-flash",
+    "source_language": "es"
+  }
+}

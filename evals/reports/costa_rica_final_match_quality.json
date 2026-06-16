@@ -1,0 +1,57 @@
+{
+  "by_language": {
+    "en-en": {
+      "all_decisive_candidate_rows": 0,
+      "all_relevant_candidate_rows": 0,
+      "candidate_rows": 270,
+      "f1": null,
+      "missing_gold_rows": 45,
+      "precision": null,
+      "recall": null,
+      "recall_denominator": null,
+      "recall_denominator_ready": false,
+      "selected_decisive_rows": 0,
+      "selected_relevant_rows": 0,
+      "selected_rows": 270,
+      "selected_unlabeled_or_unclear_rows": 270,
+      "unlabeled_or_unclear_candidate_rows": 270
+    },
+    "es-en": {
+      "all_decisive_candidate_rows": 0,
+      "all_relevant_candidate_rows": 0,
+      "candidate_rows": 270,
+      "f1": null,
+      "missing_gold_rows": 66,
+      "precision": null,
+      "recall": null,
+      "recall_denominator": null,
+      "recall_denominator_ready": false,
+      "selected_decisive_rows": 0,
+      "selected_relevant_rows": 0,
+      "selected_rows": 270,
+      "selected_unlabeled_or_unclear_rows": 270,
+      "unlabeled_or_unclear_candidate_rows": 270
+    }
+  },
+  "overall": {
+    "all_decisive_candidate_rows": 0,
+    "all_relevant_candidate_rows": 0,
+    "candidate_rows": 540,
+    "f1": null,
+    "missing_gold_rows": 111,
+    "precision": null,
+    "recall": null,
+    "recall_denominator": null,
+    "recall_denominator_ready": false,
+    "selected_decisive_rows": 0,
+    "selected_relevant_rows": 0,
+    "selected_rows": 540,
+    "selected_unlabeled_or_unclear_rows": 540,
+    "unlabeled_or_unclear_candidate_rows": 540
+  },
+  "policy": {
+    "max_rank": 10,
+    "min_semantic_score": null
+  },
+  "selected_false_positive_categories": {}
+}
