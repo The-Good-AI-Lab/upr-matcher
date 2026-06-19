@@ -4,6 +4,10 @@ This is the focused plan for evaluating the ML behavior of UPR Matcher. It
 intentionally excludes UI checks, API contract checks, and deterministic parser
 robustness except where those checks protect the validity of ML metrics.
 
+Current PR-level results are summarized in `evals/RESULTS.md`. Generated traces,
+reports, and labeling queues are local artifacts under ignored `evals/traces/`,
+`evals/reports/`, and `evals/labeling/` directories.
+
 The ML system under evaluation is:
 
 ```text
@@ -331,14 +335,15 @@ uv run --project backend python evals/tools/run_ml_eval_suite.py \
   --max-cost-usd 10
 ```
 
-The first candidate labeling queue generator uses:
+The first candidate labeling queue generator uses generated baseline traces.
+These paths are examples of local outputs, not committed fixtures:
 
 Input:
 
 - `evals/traces/live/costa_rica_parser_regression_es_gold.json`
 - `evals/traces/live/costa_rica_parser_regression_en_gold.json`
 
-Output:
+Generated output:
 
 - `evals/labeling/costa_rica_candidate_pairs.jsonl`
 - Current generated size: 540 blinded review rows with blank human label fields.
@@ -349,8 +354,9 @@ Output:
 - Current generated size: 111 rows, covering known gold positives absent from
   top-10 candidates.
 - `evals/reports/costa_rica_candidate_label_metrics.md`
-- Initial report shows label coverage only; precision metrics become meaningful
-  after `human_relevance` is filled.
+
+Initial generated reports show label coverage only; precision metrics become
+meaningful after `human_relevance` is filled.
 
 Each row should include:
 

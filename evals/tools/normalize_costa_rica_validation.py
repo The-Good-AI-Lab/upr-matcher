@@ -91,8 +91,8 @@ def parse_validation_workbook(path: Path, *, language: str) -> dict[str, list[di
                     "theme": theme,
                     "theme_slug": theme_slug,
                     f"source_recommendation_{language}": source_text,
-                    "source_file": str(VALIDATION_ROOT / SOURCE_FILE),
-                    "validation_workbook": str(path),
+                    "source_file": SOURCE_FILE,
+                    "validation_workbook": path.name,
                 }
                 sources.append(current_source)
 
@@ -117,8 +117,8 @@ def parse_validation_workbook(path: Path, *, language: str) -> dict[str, list[di
                         "relevance_score": 1 if relevance == "similar" else 2,
                         "target_recommendation_id": target_id,
                         f"target_recommendation_{language}": target_text,
-                        "reference_file": str(VALIDATION_ROOT / REFERENCE_FILE),
-                        "validation_workbook": str(path),
+                        "reference_file": REFERENCE_FILE,
+                        "validation_workbook": path.name,
                     }
                 )
 
@@ -140,10 +140,10 @@ def merge_sources(
                 "source_number": source["source_number"],
                 "theme": source["theme"],
                 "theme_slug": source["theme_slug"],
-                "source_file": str(VALIDATION_ROOT / SOURCE_FILE),
+                "source_file": SOURCE_FILE,
                 "validation_workbooks": [
-                    str(VALIDATION_ROOT / ENGLISH_WORKBOOK),
-                    str(VALIDATION_ROOT / SPANISH_WORKBOOK),
+                    ENGLISH_WORKBOOK,
+                    SPANISH_WORKBOOK,
                 ],
                 "source_languages": ["es", "en"],
                 "primary_source_language": "es",
@@ -182,11 +182,11 @@ def merge_links(
                 "relevance": link["relevance"],
                 "relevance_score": link["relevance_score"],
                 "target_recommendation_id": target_id,
-                "source_file": str(VALIDATION_ROOT / SOURCE_FILE),
-                "reference_file": str(VALIDATION_ROOT / REFERENCE_FILE),
+                "source_file": SOURCE_FILE,
+                "reference_file": REFERENCE_FILE,
                 "validation_workbooks": [
-                    str(VALIDATION_ROOT / ENGLISH_WORKBOOK),
-                    str(VALIDATION_ROOT / SPANISH_WORKBOOK),
+                    ENGLISH_WORKBOOK,
+                    SPANISH_WORKBOOK,
                 ],
                 "source_languages": ["es", "en"],
                 "target_label_languages": ["en", "es"],
@@ -335,10 +335,10 @@ def write_document_pairs(path: Path) -> None:
                 f"  - case_id: {CASE_ID}",
                 "    country: Costa Rica",
                 "    cycle_year: 2024",
-                f"    source_pdf: {VALIDATION_ROOT / SOURCE_FILE}",
-                f"    reference_docx: {VALIDATION_ROOT / REFERENCE_FILE}",
-                f"    validation_workbook_en: {VALIDATION_ROOT / ENGLISH_WORKBOOK}",
-                f"    validation_workbook_es: {VALIDATION_ROOT / SPANISH_WORKBOOK}",
+                f"    source_pdf: {SOURCE_FILE}",
+                f"    reference_docx: {REFERENCE_FILE}",
+                f"    validation_workbook_en: {ENGLISH_WORKBOOK}",
+                f"    validation_workbook_es: {SPANISH_WORKBOOK}",
                 "    source_languages: [es, en]",
                 "    reference_languages: [en]",
                 "    label_languages: [en, es]",

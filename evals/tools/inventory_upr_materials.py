@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -14,11 +15,12 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-MATERIALS_ROOT = Path(
-    "/home/arthur/Documents/gail/"
-    "UPR Materials - TheGoodAILab-20260615T015654Z-3-001/"
-    "UPR Materials - TheGoodAILab"
+DEFAULT_MATERIALS_ROOT = (
+    REPO_ROOT.parent
+    / "UPR Materials - TheGoodAILab-20260615T015654Z-3-001"
+    / "UPR Materials - TheGoodAILab"
 )
+MATERIALS_ROOT = Path(os.environ.get("UPR_MATERIALS_ROOT", DEFAULT_MATERIALS_ROOT)).resolve()
 OUT_JSONL = REPO_ROOT / "evals/datasets/upr_materials_document_pairs.jsonl"
 OUT_REPORT = REPO_ROOT / "evals/reports/upr_materials_inventory.md"
 PDF_SAMPLE_PAGES = 5

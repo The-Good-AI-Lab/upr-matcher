@@ -2,38 +2,12 @@ cases:
   - case_id: costa_rica_2024
     country: Costa Rica
     cycle_year: 2024
-    source_pdf: /home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/2024_UPR Costa Rica.pdf
-    reference_docx: /home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/Matrix of recommendations_CostaRica_2024.docx
-    validation_workbook_en: /home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/Tabla de Recomendaciones_Costa Rica_ENG.xlsx
-    validation_workbook_es: /home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/Tabla de Recomendaciones_Costa Rica.xlsx
+    source_pdf: 2024_UPR Costa Rica.pdf
+    reference_docx: Matrix of recommendations_CostaRica_2024.docx
+    validation_workbook_en: Tabla de Recomendaciones_Costa Rica_ENG.xlsx
+    validation_workbook_es: Tabla de Recomendaciones_Costa Rica.xlsx
     source_languages: [es, en]
     reference_languages: [en]
     label_languages: [en, es]
     primary_pipeline_language_pair: es-en
     notes: Initial normalized validation case from FMSI POC data.
-  - case_id: bangladesh_2023
-    country: Bangladesh
-    cycle_year: 2023
-    source_pdf: /home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/2023_UPR Bangladesh.pdf
-    stakeholder_pdf: /home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/Summary of the stakeholders_Bangladesh_2023.pdf
-    reference_doc: /home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/Matrix of recommendations_Bangladesh_2023.doc
-    validation_workbook: /home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/UPR Advocacy Evaluation Bangladesh.xlsx
-    source_languages: [en]
-    reference_languages: [en]
-    label_languages: [en]
-    primary_pipeline_language_pair: en-en
-    label_kind: lobbying_impact
-    notes: Extracted from advocacy evaluation matrix; labels are weaker than direct match labels.
-  - case_id: papua_new_guinea_2021
-    country: Papua New Guinea
-    cycle_year: 2021
-    source_pdf: /home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/2021_UPR PapuaNewGuinea.pdf
-    stakeholder_pdf: /home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/Summary of the stakeholders_PapuaNewGuinea_2021.pdf
-    reference_doc: /home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/Matrix of recommendations_PapuaNewGuinea_2021.docx
-    validation_workbook: /home/arthur/Documents/gail/un-recommendations/data/fmsi-poc-data/validation/1. Advocacy Plan _ Evaluation table UPR PNG.xlsx
-    source_languages: [en]
-    reference_languages: [en]
-    label_languages: [en]
-    primary_pipeline_language_pair: en-en
-    label_kind: lobbying_impact
-    notes: Extracted from advocacy evaluation matrix; labels are weaker than direct match labels.

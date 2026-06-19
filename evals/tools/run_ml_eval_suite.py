@@ -464,7 +464,7 @@ def main() -> None:
 
     es_trace = args.es_trace
     en_trace = args.en_trace
-    if args.refresh_baselines:
+    if args.refresh_baselines or not es_trace.exists() or not en_trace.exists():
         es_run_id = f"{suite_run_id}_es_gold"
         en_run_id = f"{suite_run_id}_en_gold"
         for language, run_id in (("es", es_run_id), ("en", en_run_id)):

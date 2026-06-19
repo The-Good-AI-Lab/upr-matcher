@@ -27,6 +27,10 @@ DEFAULT_REPORT_ROOT = REPO_ROOT / "evals/reports/live"
 DEFAULT_CASE_ID = "costa_rica_2024"
 DEFAULT_GOLD_SOURCES = REPO_ROOT / "evals/gold/costa_rica_2024_source_recommendations.jsonl"
 DEFAULT_GOLD_LINKS = REPO_ROOT / "evals/gold/costa_rica_2024_match_links.jsonl"
+DEFAULT_VALIDATION_ROOT = (
+    REPO_ROOT.parent / "un-recommendations" / "data" / "fmsi-poc-data" / "validation"
+)
+VALIDATION_ROOT = Path(os.environ.get("UPR_VALIDATION_ROOT", DEFAULT_VALIDATION_ROOT)).resolve()
 
 
 def _load_env_file(path: Path) -> None:
@@ -143,6 +147,15 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+def resolve_validation_path(value: str) -> Path:
+    path = Path(value)
+    if path.is_absolute() and path.exists():
+        return path
+    if path.is_absolute():
+        return VALIDATION_ROOT / path.name
+    return VALIDATION_ROOT / path
+
+
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -216,8 +229,8 @@ def load_costa_rica_case(args: argparse.Namespace) -> EvalCase:
     if not gold_links:
         raise ValueError(f"No gold match links found in {args.gold_links}")
 
-    source_pdf = Path(gold_sources[0]["source_file"])
-    reference_doc = Path(gold_links[0]["reference_file"])
+    source_pdf = resolve_validation_path(str(gold_sources[0]["source_file"]))
+    reference_doc = resolve_validation_path(str(gold_links[0]["reference_file"]))
     return EvalCase(
         case_id=args.case_id,
         source_pdf=source_pdf,
