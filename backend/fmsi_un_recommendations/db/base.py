@@ -10,8 +10,12 @@ class JobRecord:
     id: str
     user_email: str | None
     status: str
-    source_path: str
-    reference_path: str
+    source_path: str | None
+    reference_path: str | None
+    source_filename: str | None
+    reference_filename: str | None
+    source_text: str | None
+    reference_rows: list[dict[str, Any]] | None
     percent: float
     message: str
     prediction_id: str | None
@@ -76,8 +80,12 @@ class DatabaseAdapter(ABC):
         *,
         job_id: str,
         user_email: str | None,
-        source_path: str,
-        reference_path: str,
+        source_path: str | None = None,
+        reference_path: str | None = None,
+        source_filename: str | None = None,
+        reference_filename: str | None = None,
+        source_text: str | None = None,
+        reference_rows: list[dict[str, Any]] | None = None,
     ) -> None: ...
 
     @abstractmethod

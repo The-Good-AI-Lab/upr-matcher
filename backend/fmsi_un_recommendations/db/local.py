@@ -57,6 +57,10 @@ class LocalDatabase(DatabaseAdapter):
                 status        TEXT NOT NULL DEFAULT 'pending',
                 source_path   TEXT NOT NULL,
                 reference_path TEXT NOT NULL,
+                source_filename TEXT,
+                reference_filename TEXT,
+                source_text TEXT,
+                reference_rows TEXT,
                 percent       REAL NOT NULL DEFAULT 0.0,
                 message       TEXT NOT NULL DEFAULT '',
                 prediction_id TEXT,
@@ -66,7 +70,25 @@ class LocalDatabase(DatabaseAdapter):
             )
             """
         )
+        for column_name, column_type in (
+            ("source_filename", "TEXT"),
+            ("reference_filename", "TEXT"),
+            ("source_text", "TEXT"),
+            ("reference_rows", "TEXT"),
+        ):
+            self._ensure_column(cursor, "jobs", column_name, column_type)
         self._connection.commit()
+
+    @staticmethod
+    def _ensure_column(
+        cursor: sqlite3.Cursor,
+        table_name: str,
+        column_name: str,
+        column_type: str,
+    ) -> None:
+        columns = {row["name"] for row in cursor.execute(f"PRAGMA table_info({table_name})").fetchall()}
+        if column_name not in columns:
+            cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}")
 
     def save_prediction(
         self,
@@ -178,16 +200,41 @@ class LocalDatabase(DatabaseAdapter):
         *,
         job_id: str,
         user_email: str | None,
-        source_path: str,
-        reference_path: str,
+        source_path: str | None = None,
+        reference_path: str | None = None,
+        source_filename: str | None = None,
+        reference_filename: str | None = None,
+        source_text: str | None = None,
+        reference_rows: list[dict[str, Any]] | None = None,
     ) -> None:
         cursor = self._connection.cursor()
         cursor.execute(
             """
-            INSERT INTO jobs (id, user_email, status, source_path, reference_path, percent, message)
-            VALUES (?, ?, 'pending', ?, ?, 0.0, 'Waiting in queue')
+            INSERT INTO jobs (
+                id,
+                user_email,
+                status,
+                source_path,
+                reference_path,
+                source_filename,
+                reference_filename,
+                source_text,
+                reference_rows,
+                percent,
+                message
+            )
+            VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, 0.0, 'Waiting in queue')
             """,
-            (job_id, user_email, source_path, reference_path),
+            (
+                job_id,
+                user_email,
+                source_path or "",
+                reference_path or "",
+                source_filename,
+                reference_filename,
+                source_text,
+                json.dumps(reference_rows, ensure_ascii=False) if reference_rows is not None else None,
+            ),
         )
         self._connection.commit()
 
@@ -280,12 +327,17 @@ class LocalDatabase(DatabaseAdapter):
 
     @staticmethod
     def _row_to_job(row: sqlite3.Row) -> JobRecord:
+        reference_rows_raw = row["reference_rows"] if "reference_rows" in row.keys() else None
         return JobRecord(
             id=row["id"],
             user_email=row["user_email"],
             status=row["status"],
-            source_path=row["source_path"],
-            reference_path=row["reference_path"],
+            source_path=row["source_path"] or None,
+            reference_path=row["reference_path"] or None,
+            source_filename=row["source_filename"] if "source_filename" in row.keys() else None,
+            reference_filename=row["reference_filename"] if "reference_filename" in row.keys() else None,
+            source_text=row["source_text"] if "source_text" in row.keys() else None,
+            reference_rows=json.loads(reference_rows_raw) if reference_rows_raw else None,
             percent=row["percent"],
             message=row["message"],
             prediction_id=row["prediction_id"],

@@ -29,7 +29,7 @@ Dependencies are defined in this directory’s `pyproject.toml`. Lint and format
 
 - Use `uv` from this directory for dependencies and running the API.
 - Run experiments in `notebooks/` (in this directory) with Jupyter.
-- Uploads and SQLite DB use `data/` under this directory.
+- SQLite DB uses `data/` under this directory. Optional text payload snapshots use `data/uploads/`.
 
 For more details on uv usage, see the [uv documentation](https://github.com/astral-sh/uv).
 
@@ -45,11 +45,11 @@ From repo root: `cd backend && uv run app`. With auto-reload: `uvicorn fmsi_un_r
 
 ### Endpoints
 
-- `POST /matches` – accepts two uploaded files (`fmsi_pdf` for the NGO document and `un_doc` for the DOC/DOCX table). The endpoint extracts rows, embeds them, matches every pair (no cosine threshold filter), and returns the exact dictionaries produced by `match_recommendation_vectors`, enriched with a `match_id`. Each request is stored together with file paths, embeddings, and match payloads.
+- `POST /matches` – accepts JSON text fields: `fmsi_markdown`, `upr_rows`, and optional source/reference filenames. The frontend is responsible for converting the PDF/DOCX to text/table rows before calling this endpoint. The backend enqueues a worker job from those text fields.
 - `POST /feedback` – accepts `prediction_id`, `match_id`, `thumb_up`, and optional `notes`. Verifies the match belongs to the stored prediction and records a thumbs-up/down.
 - `GET /health` – simple readiness probe.
 
-Uploaded files are saved under `data/uploads/` (in this directory) so DB rows can reference them.
+Text inputs are stored on the queued job so processing does not require saved input files. Set `SAVE_TEXT_PAYLOADS=true` to also write debugging snapshots under `data/uploads/`.
 
 ### Storage Backends
 
@@ -58,13 +58,14 @@ The API supports SQLite (local) and PostgreSQL (deployment) via a small adapter.
 - `DB_BACKEND`: either `local` (default) or `postgres`.
 - `LOCAL_DB_PATH`: optional override for the SQLite path (default: `data/recommendations.db` under this directory).
 - `DATABASE_URL`: required only when `DB_BACKEND=postgres`, e.g. `postgresql://user:pass@host:5432/dbname`.
+- `SAVE_TEXT_PAYLOADS`: when `true`, also save submitted Markdown/UPR rows under `data/uploads/`; default is `false`.
 
-The `predictions` table stores input paths, normalized UN/FMSI rows (with embeddings), and match payloads (each with a `match_id`). The `feedback` table stores thumbs-up/down keyed by `prediction_id` and `match_id`.
+The `jobs` table stores queued text payloads. The `predictions` table stores optional input snapshot paths, normalized UN/FMSI rows, and match payloads (each with a `match_id`). The `feedback` table stores thumbs-up/down keyed by `prediction_id` and `match_id`.
 
 ## Repository layout (this directory)
 
 - **`fmsi_un_recommendations/`** – FastAPI app and DB adapter.
-- **`data/`** – uploads and (with local backend) SQLite DB.
+- **`data/`** – local SQLite DB and optional text payload snapshots.
 - **`prompts/`** – LLM prompts.
 - **`notebooks/`** – Jupyter experiments.
 - **`scripts/`** – standalone scripts (embed, extract, match, etc.).

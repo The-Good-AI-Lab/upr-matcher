@@ -57,11 +57,39 @@ def extract_fmsi_pdf_recommendations(
     prompt_path: Path | None = None,
     max_chunk_chars: int = DEFAULT_CHUNK_CHAR_LIMIT,
 ) -> list[Recommendation]:
-    path = Path(pdf_path)
-    if not path.exists():
-        raise FileNotFoundError(f"Could not find PDF file at {path}")
+    return extract_fmsi_document_recommendations(
+        pdf_path,
+        prompt_path=prompt_path,
+        max_chunk_chars=max_chunk_chars,
+    )
 
+
+def extract_fmsi_document_recommendations(
+    document_path: str | Path,
+    *,
+    prompt_path: Path | None = None,
+    max_chunk_chars: int = DEFAULT_CHUNK_CHAR_LIMIT,
+) -> list[Recommendation]:
+    path = Path(document_path)
+    if not path.exists():
+        raise FileNotFoundError(f"Could not find document file at {path}")
     document_text = read_text_file(path)
+    return extract_fmsi_text_recommendations(
+        document_text,
+        prompt_path=prompt_path,
+        max_chunk_chars=max_chunk_chars,
+    )
+
+
+def extract_fmsi_text_recommendations(
+    document_text: str,
+    *,
+    prompt_path: Path | None = None,
+    max_chunk_chars: int = DEFAULT_CHUNK_CHAR_LIMIT,
+) -> list[Recommendation]:
+    if settings.llm_provider.lower() != "openrouter":
+        raise NotImplementedError(f"Unsupported LLM provider: {settings.llm_provider}")
+
     prompt_file = prompt_path or DEFAULT_PROMPT_PATH
 
     try:
@@ -73,23 +101,23 @@ def extract_fmsi_pdf_recommendations(
         raise ValueError(f"Prompt file {prompt_file} is empty.")
 
     document_chunks = _chunk_text(document_text, max_chunk_chars)
-    logger.info("Extracting FMSI recommendations from PDF: {} chunks", len(document_chunks))
+    logger.info("Extracting FMSI recommendations from text: {} chunks", len(document_chunks))
 
     collected: list[Recommendation] = []
     for index, chunk in enumerate(document_chunks, start=1):
-        logger.info("Processing PDF chunk {}/{}", index, len(document_chunks))
+        logger.info("Processing document chunk {}/{}", index, len(document_chunks))
         user_prompt = (
             f"Document chunk {index} of {len(document_chunks)}:\n"
             f"{chunk}\n\nReturn only the JSON object specified by the system instructions."
         )
         response = chat_with_openrouter(system_prompt=prompt_text, user_prompt=user_prompt)
         try:
-            recommendations = json.loads(response)
+            recommendations = json.loads(_extract_json_payload(response))
         except json.JSONDecodeError as e:
             raise ValueError("Failed to parse LLM response as JSON") from e
 
         try:
-            batch: RecommendationBatch = [Recommendation.model_validate(item) for item in recommendations]
+            batch = [Recommendation.model_validate(item) for item in recommendations]
             logger.info("Chunk {}: extracted {} recommendations", index, len(batch))
         except ValidationError as e:
             raise ValueError("Validation failed") from e
@@ -101,6 +129,28 @@ def extract_fmsi_pdf_recommendations(
         raise ValueError("No recommendations extracted from LLM responses.")
     logger.info("FMSI extraction done: {} recommendations (after dedupe)", len(deduped))
     return deduped
+
+
+def _extract_json_payload(response: str) -> str:
+    text = response.strip()
+    if text.startswith("```"):
+        lines = text.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+    if text.startswith("[") or text.startswith("{"):
+        return text
+
+    start_candidates = [index for index in (text.find("["), text.find("{")) if index >= 0]
+    if not start_candidates:
+        return text
+    start = min(start_candidates)
+    end = max(text.rfind("]"), text.rfind("}"))
+    if end <= start:
+        return text
+    return text[start : end + 1]
 
 
 def extract_fmsi_recommendations_algo(pdf_text: str) -> list[dict[str, str]]:
