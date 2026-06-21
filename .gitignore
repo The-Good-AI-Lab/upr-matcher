@@ -4,3 +4,7 @@ db-export/
 AGENTS.md
 continual-learning-index.json
 backend/scripts/
+evals/labeling/
+evals/reports/
+evals/traces/
+evals/datasets/upr_materials_document_pairs.jsonl
