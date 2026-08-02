@@ -70,7 +70,14 @@ And it happens at scale. In the last completed UPR cycle alone, Member States an
 
 ## 🌍 How the UPR works
 
-The [Universal Periodic Review](https://www.ohchr.org/en/hr-bodies/upr/upr-home) is a UN process that examines the human-rights record of all 193 member states. During each review, other states make recommendations to the state under review. Every recommendation is recorded in the Working Group report, and the reviewed state then marks each one as **supported** or **noted**.
+The [Universal Periodic Review](https://www.ohchr.org/en/hr-bodies/upr/upr-home) is a UN process that examines the human-rights record of all 193 member states. Each review is informed by three public documents: a national report from the state under review, a compilation of relevant UN information prepared by OHCHR, and an OHCHR summary of stakeholder submissions. During the peer review, other states ask questions and make recommendations — every one is recorded in the Working Group report, and the reviewed state then marks each as **supported** or **noted**.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/upr-process-dark.png">
+    <img src=".github/assets/upr-process.png" alt="A national report, UN compilation, and stakeholder summary inform the UPR peer review; its recommendations are recorded in the Working Group report and then supported or noted by the state" width="720">
+  </picture>
+</p>
 
 Organizations like FMSI contribute to this process — but seeing how their recommendations connect to the ones that surface in the review is exactly the needle-in-a-haystack problem UPR Matcher was built to solve.
 
