@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  An open-source tool by <a href="https://github.com/The-Good-AI-Lab">The Good AI Lab</a> &amp; <a href="https://fmsi.ngo/en/">FMSI</a> that reads two sets of human-rights recommendations,
+  An open-source tool by <a href="https://thegoodailab.org">The Good AI Lab</a> &amp; <a href="https://fmsi.ngo/en/">FMSI</a> that reads two sets of human-rights recommendations,
   <br>finds meaning rather than matching words, and hands experts a focused shortlist to review.
 </p>
 
@@ -32,7 +32,7 @@
   <a href="#-how-it-works"><b>How it works</b></a> ·
   <a href="#-under-the-hood"><b>Under the hood</b></a> ·
   <a href="#-architecture"><b>Architecture</b></a> ·
-  <a href="https://github.com/The-Good-AI-Lab/upr-matcher"><b>Read the story ↗</b></a>
+  <a href="https://thegoodailab.org/blog/upr-matcher"><b>Read the story ↗</b></a>
 </p>
 
 ---
@@ -57,12 +57,12 @@ The hard part isn't volume alone — it's **semantics**. Recommendations from di
   </picture>
 </p>
 
-And it happens at scale. In the last completed UPR cycle alone, states made tens of thousands of recommendations — with dozens of stakeholder submissions per country to reconcile.
+And it happens at scale. In the last completed UPR cycle alone, Member States and Observers made tens of thousands of recommendations — with dozens of stakeholder submissions per country to reconcile.
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/scale-dark.png">
-    <img src=".github/assets/scale.png" alt="The third UPR cycle: 43,478 recommendations made by states, ~225 received by one country, 30+ stakeholder submissions for a typical country" width="560">
+    <img src=".github/assets/scale.png" alt="The third UPR cycle: 43,229 total recommendations from Member States and Observers, about 224 received by one country, 30+ stakeholder submissions for a typical country" width="560">
   </picture>
 </p>
 
@@ -70,14 +70,7 @@ And it happens at scale. In the last completed UPR cycle alone, states made tens
 
 ## 🌍 How the UPR works
 
-The [Universal Periodic Review](https://www.ohchr.org/en/hr-bodies/upr/upr-home) is a UN process that examines the human-rights record of all 193 member states. Each review draws on three public documents — a national report, a UN compilation, and a stakeholder summary. During the peer review, other states raise questions and make recommendations; these are recorded in the Working Group report and then **supported or noted** by the state under review.
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/upr-process-dark.png">
-    <img src=".github/assets/upr-process.png" alt="A national report, UN compilation, and stakeholder summary inform the UPR peer review; its recommendations are recorded in the Working Group report and then supported or noted by the state" width="720">
-  </picture>
-</p>
+The [Universal Periodic Review](https://www.ohchr.org/en/hr-bodies/upr/upr-home) is a UN process that examines the human-rights record of all 193 member states. During each review, other states make recommendations to the state under review. Every recommendation is recorded in the Working Group report, and the reviewed state then marks each one as **supported** or **noted**.
 
 Organizations like FMSI contribute to this process — but seeing how their recommendations connect to the ones that surface in the review is exactly the needle-in-a-haystack problem UPR Matcher was built to solve.
 
@@ -107,7 +100,7 @@ Two stages: a broad semantic retrieval pass surfaces every plausible pair, then 
 | **Extract** | UPR `.docx` tables parsed directly; FMSI `.pdf` recommendations pulled out with LLM assistance | `python-docx`, `pypdf`, `pydantic-ai` + `meta-llama/llama-3.3-70b` (OpenRouter) |
 | **Retrieve** | Embed every recommendation, keep pairs above a cosine-similarity floor | `BAAI/bge-base-en-v1.5` via `fastembed`, threshold `≥ 0.6` |
 | **Re-rank** | Score the shortlist with a cross-encoder, keep a dynamic top-k per source | `cross-encoder/ms-marco-MiniLM-L6-v2`, top-k `1–10` |
-| **Review** | Experts accept / reject / annotate; feedback is stored against each match | FastAPI `+ ` SQLite / PostgreSQL |
+| **Review** | Experts accept / reject / annotate; feedback is stored against each match | FastAPI + SQLite / PostgreSQL |
 
 Every match keeps a **traceable record** — the original texts, both scores, prediction and match IDs, and the latest expert decision — so teams can always see *why* two recommendations were linked.
 
@@ -216,8 +209,8 @@ The project uses [prek](https://prek.j178.dev/) for pre-commit hooks (shared `.p
 ```sh
 # install (choose one)
 curl --proto '=https' --tlsv1.2 -LsSf https://github.com/j178/prek/releases/download/v0.3.1/prek-installer.sh | sh
-uv tool install prek
-brew install prek
+# or: uv tool install prek
+# or: brew install prek
 ```
 
 From the repo root: `prek install`, then `prek run` from anywhere in the repo (or `prek run --all-files`). CI runs the same checks via the Backend workflow (`.github/workflows/backend.yaml` → `common.yaml`).
@@ -237,7 +230,7 @@ From the repo root: `prek install`, then `prek run` from anywhere in the repo (o
 
 ## 🤝 Built by
 
-A collaboration between the **[Good AI Lab](https://github.com/The-Good-AI-Lab)** and **[Fondazione Marista per la Solidarietà Internazionale (FMSI)](https://fmsi.ngo/en/)**, exploring how hybrid AI systems can responsibly support human-rights advocacy.
+A collaboration between the **[Good AI Lab](https://thegoodailab.org)** and **[Fondazione Marista per la Solidarietà Internazionale (FMSI)](https://fmsi.ngo/en/)**, exploring how hybrid AI systems can responsibly support human-rights advocacy.
 
 > The most impactful AI systems are not those that replace human expertise, but those that strengthen it.
 
