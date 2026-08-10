@@ -115,3 +115,12 @@ def test_empty_gold_yields_empty_macro() -> None:
     assert m["evaluated_sources"] == 0
     assert m["per_source"] == {}
     assert m["macro"] == {}
+
+
+def test_duplicate_target_ids_count_only_at_their_highest_rank() -> None:
+    m = ranking_metrics({"s1": ["t1", "t1", "x"]}, {"s1": {"t1": 1}})
+    source = m["per_source"]["s1"]
+
+    assert source["returned_count"] == 2
+    assert source["precision@3"] == pytest.approx(0.5, **APPROX)
+    assert source["ndcg@3"] == pytest.approx(1.0, **APPROX)

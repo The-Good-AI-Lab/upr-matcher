@@ -56,7 +56,7 @@ from fmsi_un_recommendations.recommendation_processing import (  # noqa: E402
     _chunk_text,
     extract_un_recommendation_rows,
 )
-from fmsi_un_recommendations.reranker import RecommendationReranker  # noqa: E402
+from fmsi_un_recommendations.openrouter import rerank_openrouter  # noqa: E402
 from fmsi_un_recommendations.settings import Settings  # noqa: E402
 from fmsi_un_recommendations.similarity_search import (  # noqa: E402
     Recommendation as MatchRecommendation,
@@ -426,7 +426,9 @@ def ranking_metrics(
     aggregate: dict[str, list[float]] = defaultdict(list)
     for source_id, expected in gold_links.items():
         expected_ids = set(expected)
-        ranking = [target_id for target_id in rankings.get(source_id, []) if target_id]
+        # A recommendation ID can appear in more than one parsed table row.
+        # Metrics operate on IDs, so preserve only the highest-ranked occurrence.
+        ranking = list(dict.fromkeys(target_id for target_id in rankings.get(source_id, []) if target_id))
         source_metrics: dict[str, Any] = {
             "expected_count": len(expected_ids),
             "returned_count": len(ranking),
@@ -521,16 +523,7 @@ def rerank_grouped_matches(
     *,
     candidate_top_k: int,
     reranker_top_k: int,
-    batch_size: int,
 ) -> tuple[dict[str, list[dict[str, Any]]], str | None]:
-    try:
-        try:
-            reranker = RecommendationReranker(min_k=1, max_k=reranker_top_k, batch_size=batch_size)
-        except TypeError:
-            reranker = RecommendationReranker(min_k=1, max_k=reranker_top_k)
-    except Exception as exc:  # pragma: no cover - environment/model dependent
-        return {}, f"Could not initialize reranker: {exc}"
-
     reranked: dict[str, list[dict[str, Any]]] = {}
     try:
         for source_id, matches in grouped.items():
@@ -540,17 +533,32 @@ def rerank_grouped_matches(
                 continue
             source_text = candidates[0].get("source_text", "")
             candidate_texts = [match.get("target_text", "") for match in candidates]
-            rerank_results = reranker.rerank([source_text], candidate_texts)
+            rerank_results = rerank_openrouter(
+                source_text,
+                candidate_texts,
+                top_n=min(reranker_top_k, len(candidate_texts)),
+            )
             source_results = []
             for result in rerank_results:
                 original = dict(candidates[result.candidate_index])
-                original["reranker_score"] = result.reranker_score
+                original["reranker_score"] = result.relevance_score
                 source_results.append(original)
             source_results.sort(key=lambda item: item.get("reranker_score", 0.0), reverse=True)
             reranked[source_id] = source_results
     except Exception as exc:  # pragma: no cover - environment/model dependent
         return {}, f"Reranking failed: {exc}"
     return reranked, None
+
+
+def require_openrouter_opt_ins(args: argparse.Namespace, run_settings: Settings) -> None:
+    if run_settings.embedding_provider.lower() == "openrouter" and not args.allow_openrouter_embeddings:
+        raise RuntimeError("Refusing paid OpenRouter embedding calls without --allow-openrouter-embeddings")
+    if (
+        not args.skip_reranker
+        and run_settings.reranker_provider.lower() == "openrouter"
+        and not args.allow_openrouter_reranker
+    ):
+        raise RuntimeError("Refusing paid OpenRouter reranker calls without --allow-openrouter-reranker")
 
 
 def evaluate_case(args: argparse.Namespace) -> dict[str, Any]:
@@ -561,6 +569,9 @@ def evaluate_case(args: argparse.Namespace) -> dict[str, Any]:
         prompt_usd_per_1m=args.prompt_usd_per_1m,
         completion_usd_per_1m=args.completion_usd_per_1m,
     )
+
+    run_settings = Settings()
+    require_openrouter_opt_ins(args, run_settings)
 
     case = load_costa_rica_case(args)
     if not case.source_pdf.exists():
@@ -682,14 +693,12 @@ def evaluate_case(args: argparse.Namespace) -> dict[str, Any]:
                 grouped_semantic,
                 candidate_top_k=args.candidate_top_k,
                 reranker_top_k=args.reranker_top_k,
-                batch_size=args.reranker_batch_size,
             ),
         )
         if reranked_grouped:
             reranker_rankings = ranking_from_grouped(reranked_grouped, k=args.reranker_top_k)
             reranker_metrics = ranking_metrics(reranker_rankings, gold_links)
 
-    run_settings = Settings()
     trace = {
         "run_id": run_id,
         "created_at": datetime.now(UTC).isoformat(),
@@ -706,6 +715,8 @@ def evaluate_case(args: argparse.Namespace) -> dict[str, Any]:
             "match_threshold": args.match_threshold,
             "candidate_top_k": args.candidate_top_k,
             "skip_reranker": args.skip_reranker,
+            "allow_openrouter_embeddings": args.allow_openrouter_embeddings,
+            "allow_openrouter_reranker": args.allow_openrouter_reranker,
             "reranker_top_k": args.reranker_top_k,
             "limit_sources": args.limit_sources,
             "limit_targets": args.limit_targets,
@@ -807,7 +818,8 @@ def render_markdown_report(trace: dict[str, Any], trace_path: Path) -> str:
         f"- Source language: `{trace['settings']['source_language']}`",
         f"- Embedding model: `{trace['settings'].get('embedding_model', 'unknown')}`",
         f"- Embedding provider: `{trace['settings'].get('embedding_provider', 'unknown')}`",
-        f"- OpenRouter calls: {usage['calls']} (~${usage['estimated_cost_usd']:.6f} estimated)",
+        f"- OpenRouter extraction calls: {usage['calls']} (~${usage['estimated_cost_usd']:.6f} estimated)",
+        "- Embedding and reranker costs are separately opt-in and are not included in the extraction budget.",
         "",
         "## Document Extraction",
         "",
@@ -878,9 +890,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--candidate-top-k", type=int, default=30)
     parser.add_argument("--skip-reranker", action="store_true")
     parser.add_argument("--reranker-top-k", type=int, default=10)
-    parser.add_argument("--reranker-batch-size", type=int, default=16)
     parser.add_argument("--trace-top-matches", type=int, default=10)
     parser.add_argument("--allow-openrouter", action="store_true")
+    parser.add_argument("--allow-openrouter-embeddings", action="store_true")
+    parser.add_argument("--allow-openrouter-reranker", action="store_true")
     parser.add_argument("--openrouter-model", default=None)
     parser.add_argument("--max-cost-usd", type=float, default=10.0)
     parser.add_argument("--prompt-usd-per-1m", type=float, default=1.0)
