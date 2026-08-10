@@ -14,7 +14,9 @@ class Settings(BaseSettings):
     reranker_model: str = "cohere/rerank-4-pro"
     rerank_candidate_limit: int = 30
     rerank_top_n: int = 5
-    match_threshold: float = 0.6
+    match_threshold: float = (
+        0.0  # top-k retrieval; 0.6 was bge-era and uncalibrated for qwen (es-en recall@10 0.0 -> 0.64)
+    )
     match_workers: int = 1
     store_embeddings: bool = False
     save_text_payloads: bool = False

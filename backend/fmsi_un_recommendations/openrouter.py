@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
@@ -11,6 +12,10 @@ from .settings import Settings
 from .utils import get_openrouter_client
 
 settings = Settings()
+
+# Rerank uses a raw HTTP call (no SDK retry), so transient failures are retried here.
+_RERANK_MAX_ATTEMPTS = 5
+_RETRYABLE_STATUS = {429, 500, 502, 503, 504}
 
 
 @dataclass(slots=True)
@@ -65,12 +70,30 @@ def rerank_openrouter(
         method="POST",
     )
 
-    try:
-        with urlopen(request, timeout=120) as response:
-            raw = response.read().decode("utf-8")
-    except HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"OpenRouter rerank failed ({exc.code}): {detail}") from exc
+    raw: str | None = None
+    last_exc: Exception | None = None
+    for attempt in range(_RERANK_MAX_ATTEMPTS):
+        try:
+            with urlopen(request, timeout=120) as response:
+                raw = response.read().decode("utf-8")
+            break
+        except HTTPError as exc:
+            if exc.code in _RETRYABLE_STATUS and attempt < _RERANK_MAX_ATTEMPTS - 1:
+                last_exc = exc
+                time.sleep(min(2.0**attempt, 16.0))
+                continue
+            detail = exc.read().decode("utf-8", errors="replace")
+            raise RuntimeError(f"OpenRouter rerank failed ({exc.code}): {detail}") from exc
+        except OSError as exc:
+            last_exc = exc
+            if attempt < _RERANK_MAX_ATTEMPTS - 1:
+                time.sleep(min(2.0**attempt, 16.0))
+                continue
+            reason = getattr(exc, "reason", str(exc))
+            raise RuntimeError(f"OpenRouter rerank connection failed: {reason}") from exc
+
+    if raw is None:  # pragma: no cover - defensive
+        raise RuntimeError("OpenRouter rerank failed after retries") from last_exc
 
     data = json.loads(raw)
     return _parse_rerank_results(data)

@@ -41,9 +41,15 @@ def _require_openrouter_key() -> str:
 
 
 def get_openrouter_client() -> OpenAI:
+    # Resilience: the OpenAI SDK retries transient transport errors, 429, and 5xx
+    # with exponential backoff. Default max_retries is 2; raise it and bound the
+    # per-request time so a hung connection fails fast and is retried instead of
+    # crashing the job. Covers both chat (extraction) and embeddings.
     return OpenAI(
         base_url=settings.agent_base_url,
         api_key=_require_openrouter_key(),
+        max_retries=5,
+        timeout=120.0,
     )
 
 
