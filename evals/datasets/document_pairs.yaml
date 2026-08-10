@@ -1,0 +1,13 @@
+cases:
+  - case_id: costa_rica_2024
+    country: Costa Rica
+    cycle_year: 2024
+    source_pdf: 2024_UPR Costa Rica.pdf
+    reference_docx: Matrix of recommendations_CostaRica_2024.docx
+    validation_workbook_en: Tabla de Recomendaciones_Costa Rica_ENG.xlsx
+    validation_workbook_es: Tabla de Recomendaciones_Costa Rica.xlsx
+    source_languages: [es, en]
+    reference_languages: [en]
+    label_languages: [en, es]
+    primary_pipeline_language_pair: es-en
+    notes: Initial normalized validation case from FMSI POC data.
