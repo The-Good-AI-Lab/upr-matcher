@@ -69,10 +69,10 @@ def summarize_rows(
     all_relevant = [row for row in all_decisive if row.get("human_relevance") in RELEVANT_LABELS]
     unlabeled_selected = len(selected) - len(selected_decisive)
     non_decisive_candidates = len(candidates) - len(all_decisive)
-    recall_denominator_ready = non_decisive_candidates == 0
+    metrics_ready = non_decisive_candidates == 0
     recall_denominator = len(all_relevant) + len(missing)
-    precision = pct(len(selected_relevant), len(selected_decisive))
-    recall = pct(len(selected_relevant), recall_denominator) if recall_denominator_ready else None
+    precision = pct(len(selected_relevant), len(selected_decisive)) if metrics_ready else None
+    recall = pct(len(selected_relevant), recall_denominator) if metrics_ready else None
     return {
         "candidate_rows": len(candidates),
         "selected_rows": len(selected),
@@ -83,8 +83,9 @@ def summarize_rows(
         "all_relevant_candidate_rows": len(all_relevant),
         "unlabeled_or_unclear_candidate_rows": non_decisive_candidates,
         "missing_gold_rows": len(missing),
-        "recall_denominator_ready": recall_denominator_ready,
-        "recall_denominator": recall_denominator if recall_denominator_ready else None,
+        "metrics_ready": metrics_ready,
+        "recall_denominator_ready": metrics_ready,
+        "recall_denominator": recall_denominator if metrics_ready else None,
         "precision": precision,
         "recall": recall,
         "f1": f1(precision, recall),
@@ -134,7 +135,7 @@ def render_report(summary: dict[str, Any]) -> str:
         "# Costa Rica Final Match Quality",
         "",
         "This report evaluates a configurable final-output policy over human-labeled candidate rows.",
-        "Metrics stay `n/a` until the candidate queue has decisive human labels.",
+        "Metrics stay `n/a` until every candidate row has a decisive human label.",
         "",
         "## Policy",
         "",
