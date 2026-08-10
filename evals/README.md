@@ -34,19 +34,20 @@ uv run --project backend python evals/tools/run_ml_eval_suite.py
 ```
 
 Live OpenRouter stages read `backend/.env` for `OPENROUTER_API_KEY`, but the
-eval scripts never print the key.
+eval scripts never print the key. Every paid stage requires its own explicit
+opt-in flag.
 
 ## Default Suite
 
-Run the deterministic offline suite from the repository root:
+Assemble the deterministic suite from existing local traces from the repository root:
 
 ```bash
 uv run --project backend python evals/tools/run_ml_eval_suite.py
 ```
 
-If baseline traces are absent, the suite regenerates them before building the
-local labeling queue and summary reports. Outputs remain local because the
-artifact directories are ignored.
+If baseline traces are absent, pass both `--refresh-baselines` and
+`--allow-openrouter-embeddings` to regenerate them. Outputs remain local
+because the artifact directories are ignored.
 
 ## Stage Commands
 
@@ -58,6 +59,7 @@ uv run --project backend python evals/tools/run_ai_pipeline_eval.py \
   --source-language es \
   --candidate-top-k 10 \
   --skip-reranker \
+  --allow-openrouter-embeddings \
   --run-id costa_rica_es_gold
 ```
 

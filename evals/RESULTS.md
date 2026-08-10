@@ -128,17 +128,11 @@ recall.
 
 ## Reranker Lift
 
-The OpenRouter reranker did not improve the tested Costa Rica metrics.
-
-| Threshold | Pair | Semantic recall@10 | Reranked recall@10 | Delta | Semantic MRR | Reranked MRR | Delta |
-| ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 0.3 | `es-en` | 0.6342 | 0.5344 | -0.0998 | 0.6146 | 0.6019 | -0.0127 |
-| 0.3 | `en-en` | 0.6482 | 0.5464 | -0.1018 | 0.6625 | 0.5972 | -0.0653 |
-| 0.6 | `es-en` | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
-| 0.6 | `en-en` | 0.2365 | 0.2081 | -0.0284 | 0.4167 | 0.4074 | -0.0093 |
-
-Do not treat reranking as a quality improvement until it is retuned or gated by
-labeled metrics.
+The original reranker table was invalidated during review: the harness requested
+10 results, while the production wrapper silently capped the API request at 5.
+The harness now sends its requested `top_n` directly and requires an explicit
+`--allow-openrouter-reranker` flag. Reranker lift must be rerun before drawing a
+quality conclusion.
 
 ## Extraction Stability
 
