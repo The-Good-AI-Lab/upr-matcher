@@ -9,12 +9,9 @@ from docx import Document
 
 from fmsi_un_recommendations.utils import docx_tables_to_json, read_text_file
 
-
 OLE_COMPOUND_DOCUMENT_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
 MATERIALS_ROOT = Path(
-    "/home/arthur/Documents/gail/"
-    "UPR Materials - TheGoodAILab-20260615T015654Z-3-001/"
-    "UPR Materials - TheGoodAILab"
+    "/home/arthur/Documents/gail/UPR Materials - TheGoodAILab-20260615T015654Z-3-001/UPR Materials - TheGoodAILab"
 )
 SOUTH_AFRICA_DOC = MATERIALS_ROOT / "Matrix of recommendations_SouthAfrica_2022.doc"
 TANZANIA_DOCX = MATERIALS_ROOT / "Matrix of recommendations_Tanzania_2016.docx"
@@ -122,6 +119,26 @@ class WordDocumentParsingTests(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["Right or area"], "2.1 Acceptance of international norms")
         self.assertIn("130.1", rows[0]["Recommendation"])
+
+    def test_themes_header_is_not_treated_as_metadata(self) -> None:
+        with TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "themes-header.docx"
+            document = Document()
+            table = document.add_table(rows=2, cols=3)
+            table.rows[0].cells[0].text = "Themes"
+            table.rows[0].cells[1].text = "Recommendation"
+            table.rows[0].cells[2].text = "Position"
+            table.rows[1].cells[0].text = "A12 Freedom of expression"
+            table.rows[1].cells[1].text = "140.1 Protect journalists (State);"
+            table.rows[1].cells[2].text = "Supported"
+            document.save(path)
+
+            rows = docx_tables_to_json(path)
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["Themes"], "A12 Freedom of expression")
+        self.assertIn("140.1", rows[0]["Recommendation"])
+        self.assertEqual(rows[0]["Position"], "Supported")
 
     def test_legacy_doc_has_actionable_error(self) -> None:
         with TemporaryDirectory() as tmp_dir:

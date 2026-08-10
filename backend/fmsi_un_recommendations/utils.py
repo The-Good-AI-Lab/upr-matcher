@@ -1,5 +1,5 @@
-from collections.abc import Iterable
 import re
+from collections.abc import Iterable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Final
 from zipfile import BadZipFile, ZipFile, is_zipfile
@@ -91,7 +91,7 @@ def _is_section_metadata_row(cells: list[str]) -> bool:
     if not cells:
         return False
     first_cell = cells[0].lower()
-    return first_cell.startswith("theme") or first_cell.startswith("right or area")
+    return first_cell.startswith(("theme:", "right or area:"))
 
 
 def _has_target_id(cells: list[str]) -> bool:
@@ -104,14 +104,10 @@ def _require_docx_package(path: Path) -> None:
         raise ValueError(f"Unsupported Word document type: {ext}")
     with path.open("rb") as handle:
         if handle.read(len(OLE_COMPOUND_DOCUMENT_MAGIC)) == OLE_COMPOUND_DOCUMENT_MAGIC:
-            raise ValueError(
-                f"Legacy .doc files are not supported: {path}. Convert the file to .docx before upload."
-            )
+            raise ValueError(f"Legacy .doc files are not supported: {path}. Convert the file to .docx before upload.")
     if not is_zipfile(path):
         if ext == ".doc":
-            raise ValueError(
-                f"Legacy .doc files are not supported: {path}. Convert the file to .docx before upload."
-            )
+            raise ValueError(f"Legacy .doc files are not supported: {path}. Convert the file to .docx before upload.")
         raise ValueError(f"Invalid .docx file: {path} is not a readable WordprocessingML package.")
     try:
         with ZipFile(path) as archive:
@@ -213,11 +209,7 @@ def _table_to_json(table: Table) -> list[dict]:
 
     table_rows = list(table.rows)
     first_content_index = next(
-        (
-            index
-            for index, row in enumerate(table_rows)
-            if any(_normalize_cell_text(cell.text) for cell in row.cells)
-        ),
+        (index for index, row in enumerate(table_rows) if any(_normalize_cell_text(cell.text) for cell in row.cells)),
         None,
     )
     if first_content_index is None:
