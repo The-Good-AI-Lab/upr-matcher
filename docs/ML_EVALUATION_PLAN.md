@@ -308,10 +308,15 @@ Opt-in stage runs:
 
 ```sh
 # Recompute local retrieval baselines.
-uv run --project backend python evals/tools/run_ml_eval_suite.py --refresh-baselines
+uv run --project backend python evals/tools/run_ml_eval_suite.py \
+  --refresh-baselines \
+  --allow-openrouter-embeddings
 
 # Run local reranker sweeps, then summarize lift.
-uv run --project backend python evals/tools/run_ml_eval_suite.py --run-reranker-sweep
+uv run --project backend python evals/tools/run_ml_eval_suite.py \
+  --run-reranker-sweep \
+  --allow-openrouter-embeddings \
+  --allow-openrouter-reranker
 
 # Compare OpenRouter embedding models. Use dry-run first to avoid accidental
 # paid calls.

@@ -146,7 +146,7 @@ def load_embedding_sweep(path: Path) -> dict[str, Any] | None:
 
 
 def build_baseline_command(language: str, run_id: str, args: argparse.Namespace) -> list[str]:
-    return [
+    command = [
         args.python,
         str(TOOLS_ROOT / "run_ai_pipeline_eval.py"),
         "--source-mode",
@@ -163,6 +163,9 @@ def build_baseline_command(language: str, run_id: str, args: argparse.Namespace)
         "--report-root",
         str(args.report_root),
     ]
+    if args.allow_openrouter_embeddings:
+        command.append("--allow-openrouter-embeddings")
+    return command
 
 
 def build_reranker_command(language: str, run_id: str, args: argparse.Namespace) -> list[str]:
@@ -186,6 +189,10 @@ def build_reranker_command(language: str, run_id: str, args: argparse.Namespace)
     ]
     if args.reranker_limit_sources:
         command.extend(["--limit-sources", str(args.reranker_limit_sources)])
+    if args.allow_openrouter_embeddings:
+        command.append("--allow-openrouter-embeddings")
+    if args.allow_openrouter_reranker:
+        command.append("--allow-openrouter-reranker")
     return command
 
 
@@ -420,6 +427,11 @@ def compute_language_gap(rows: list[dict[str, Any]]) -> dict[str, float] | None:
     return gap
 
 
+def final_quality_gate_status(final_quality: dict[str, Any] | None) -> str:
+    metrics_ready = (final_quality or {}).get("overall", {}).get("metrics_ready") is True
+    return "metrics available" if metrics_ready else "metrics blocked on labels"
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--python", default=sys.executable)
@@ -441,6 +453,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--refresh-baselines", action="store_true")
     parser.add_argument("--skip-label-artifacts", action="store_true")
     parser.add_argument("--run-reranker-sweep", action="store_true")
+    parser.add_argument("--allow-openrouter-reranker", action="store_true")
     parser.add_argument("--reranker-language", choices=["en", "es"], action="append", dest="reranker_languages")
     parser.add_argument("--reranker-top-k", type=int, default=10)
     parser.add_argument("--reranker-limit-sources", type=int, default=5)
@@ -464,7 +477,16 @@ def main() -> None:
 
     es_trace = args.es_trace
     en_trace = args.en_trace
-    if args.refresh_baselines or not es_trace.exists() or not en_trace.exists():
+    missing_baselines = [path for path in (es_trace, en_trace) if not path.exists()]
+    if missing_baselines and not args.refresh_baselines:
+        missing = ", ".join(str(path) for path in missing_baselines)
+        raise FileNotFoundError(
+            f"Baseline trace(s) not found: {missing}. "
+            "Pass --refresh-baselines --allow-openrouter-embeddings to generate them."
+        )
+    if args.refresh_baselines:
+        if not args.allow_openrouter_embeddings:
+            raise RuntimeError("--refresh-baselines requires --allow-openrouter-embeddings")
         es_run_id = f"{suite_run_id}_es_gold"
         en_run_id = f"{suite_run_id}_en_gold"
         for language, run_id in (("es", es_run_id), ("en", en_run_id)):
@@ -499,6 +521,11 @@ def main() -> None:
 
     reranker_trace_paths: list[Path] = []
     if args.run_reranker_sweep:
+        if not args.allow_openrouter_embeddings or not args.allow_openrouter_reranker:
+            raise RuntimeError(
+                "--run-reranker-sweep requires --allow-openrouter-embeddings "
+                "and --allow-openrouter-reranker"
+            )
         languages = args.reranker_languages or ["en", "es"]
         for language in languages:
             run_id = f"{suite_run_id}_reranker_{language}"
@@ -553,6 +580,7 @@ def main() -> None:
         embedding_sweep = load_embedding_sweep(DEFAULT_EMBEDDING_SWEEP_JSON)
 
     retrieval_rows = [trace_summary(es_trace), trace_summary(en_trace)]
+    final_quality = load_final_quality(DEFAULT_FINAL_JSON)
     summary = {
         "created_at": datetime.now(UTC).isoformat(),
         "suite_run_id": suite_run_id,
@@ -562,7 +590,7 @@ def main() -> None:
         "labels": label_summary(DEFAULT_CANDIDATES, DEFAULT_MISSING),
         "reranker_lift": load_reranker_rows(DEFAULT_RERANKER_JSON),
         "embedding_model_sweep": embedding_sweep,
-        "final_match_quality": load_final_quality(DEFAULT_FINAL_JSON),
+        "final_match_quality": final_quality,
         "extraction_stability": extraction_trace,
         "gate_status": [
             {
@@ -588,9 +616,7 @@ def main() -> None:
             },
             {
                 "stage": "Final match quality",
-                "status": "metrics blocked on labels"
-                if (load_final_quality(DEFAULT_FINAL_JSON) or {}).get("overall", {}).get("precision") is None
-                else "metrics available",
+                "status": final_quality_gate_status(final_quality),
             },
             {"stage": "LLM judge validation", "status": "blocked until enough human pass/fail labels exist"},
         ],
