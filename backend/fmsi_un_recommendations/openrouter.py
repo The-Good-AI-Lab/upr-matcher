@@ -5,7 +5,7 @@ import time
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
-from urllib.error import HTTPError, URLError
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from .settings import Settings
@@ -84,12 +84,13 @@ def rerank_openrouter(
                 continue
             detail = exc.read().decode("utf-8", errors="replace")
             raise RuntimeError(f"OpenRouter rerank failed ({exc.code}): {detail}") from exc
-        except URLError as exc:
+        except OSError as exc:
             last_exc = exc
             if attempt < _RERANK_MAX_ATTEMPTS - 1:
                 time.sleep(min(2.0**attempt, 16.0))
                 continue
-            raise RuntimeError(f"OpenRouter rerank connection failed: {exc.reason}") from exc
+            reason = getattr(exc, "reason", str(exc))
+            raise RuntimeError(f"OpenRouter rerank connection failed: {reason}") from exc
 
     if raw is None:  # pragma: no cover - defensive
         raise RuntimeError("OpenRouter rerank failed after retries") from last_exc

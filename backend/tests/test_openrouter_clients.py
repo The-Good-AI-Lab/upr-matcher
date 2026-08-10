@@ -1,15 +1,41 @@
 import os
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 os.environ.setdefault("OPENROUTER_API_KEY", "test-key")
 
+from fmsi_un_recommendations import openrouter as openrouter_module  # noqa: E402
 from fmsi_un_recommendations import reranker as reranker_module  # noqa: E402
-from fmsi_un_recommendations.openrouter import _parse_rerank_results  # noqa: E402
+from fmsi_un_recommendations.openrouter import (
+    _parse_rerank_results,  # noqa: E402
+    rerank_openrouter,  # noqa: E402
+)
 from fmsi_un_recommendations.reranker import RecommendationReranker  # noqa: E402
 
 
 class OpenRouterClientTests(TestCase):
+    def test_rerank_retries_transient_response_read_errors(self) -> None:
+        for error in (TimeoutError("timed out"), ConnectionResetError("reset")):
+            with self.subTest(error=type(error).__name__):
+                failed_response = MagicMock()
+                failed_response.__enter__.return_value.read.side_effect = error
+                successful_response = MagicMock()
+                successful_response.__enter__.return_value.read.return_value = b'{"results": []}'
+
+                with (
+                    patch.object(
+                        openrouter_module,
+                        "urlopen",
+                        side_effect=[failed_response, successful_response],
+                    ) as mock_urlopen,
+                    patch.object(openrouter_module.time, "sleep") as mock_sleep,
+                ):
+                    results = rerank_openrouter("query", ["candidate"])
+
+                self.assertEqual(results, [])
+                self.assertEqual(mock_urlopen.call_count, 2)
+                mock_sleep.assert_called_once_with(1.0)
+
     def test_parse_rerank_results_accepts_openrouter_shape(self) -> None:
         parsed = _parse_rerank_results(
             {
