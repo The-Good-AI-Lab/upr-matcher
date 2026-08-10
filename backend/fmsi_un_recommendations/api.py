@@ -164,9 +164,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.on_event("startup")
     def _log_startup() -> None:
-        logger.info(
-            "FMSI UN Recommendations API started; POST /matches (text payload), POST /feedback, GET /health"
-        )
+        logger.info("FMSI UN Recommendations API started; POST /matches (text payload), POST /feedback, GET /health")
         try:
             db = get_database(app_settings)
             recovered = db.fail_stale_jobs(0)
