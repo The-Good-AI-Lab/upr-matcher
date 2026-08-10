@@ -1,6 +1,8 @@
+import re
 from collections.abc import Iterable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Final
+from zipfile import BadZipFile, ZipFile, is_zipfile
 
 from docx import Document
 from docx.table import Table
@@ -27,10 +29,97 @@ else:  # pragma: no cover
 from .settings import Settings
 
 settings = Settings()
+OLE_COMPOUND_DOCUMENT_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
+TARGET_ID_RE = re.compile(r"\b\d{2,3}\.\d{1,3}\b")
 
 
 def _normalize_cell_text(value: str) -> str:
     return value.strip().replace("\xa0", " ")
+
+
+def _header_groups(headers: list[str]) -> list[tuple[str, list[int]]]:
+    counts: dict[str, int] = {}
+    groups: list[tuple[str, list[int], str]] = []
+    for index, header in enumerate(headers, start=1):
+        base = header or f"Column {index}"
+        if groups and groups[-1][2] == base:
+            groups[-1][1].append(index - 1)
+            continue
+        counts[base] = counts.get(base, 0) + 1
+        name = base
+        if counts[base] > 1:
+            name = f"{base} {counts[base]}"
+        groups.append((name, [index - 1], base))
+    return [(name, indexes) for name, indexes, _ in groups]
+
+
+def _headers_to_groups(headers: list[str]) -> list[tuple[str, list[int]]]:
+    groups: list[tuple[str, list[int]]] = []
+    for index, header in enumerate(headers):
+        groups.append((header, [index]))
+    return groups
+
+
+def _merge_grouped_cells(cells: list[str], indexes: list[int]) -> str:
+    values: list[str] = []
+    seen: set[str] = set()
+    for index in indexes:
+        if index >= len(cells):
+            continue
+        value = cells[index]
+        if not value or value in seen:
+            continue
+        seen.add(value)
+        values.append(value)
+    return "\n\n".join(values)
+
+
+def _grouped_row_to_dict(cells: list[str], groups: list[tuple[str, list[int]]]) -> dict[str, str]:
+    row_data: dict[str, str] = {}
+    for header, indexes in groups:
+        row_data[header] = _merge_grouped_cells(cells, indexes)
+    return row_data
+
+
+def _fallback_headers(width: int) -> list[str]:
+    if width <= 0:
+        return []
+    return ["Recommendation", *[f"Column {index}" for index in range(2, width + 1)]]
+
+
+def _is_section_metadata_row(cells: list[str]) -> bool:
+    if not cells:
+        return False
+    first_cell = cells[0].lower()
+    return first_cell.startswith(("theme:", "right or area:"))
+
+
+def _has_target_id(cells: list[str]) -> bool:
+    return any(TARGET_ID_RE.search(cell) for cell in cells)
+
+
+def _require_docx_package(path: Path) -> None:
+    ext = path.suffix.lower()
+    if ext not in {".doc", ".docx"}:
+        raise ValueError(f"Unsupported Word document type: {ext}")
+    with path.open("rb") as handle:
+        if handle.read(len(OLE_COMPOUND_DOCUMENT_MAGIC)) == OLE_COMPOUND_DOCUMENT_MAGIC:
+            raise ValueError(f"Legacy .doc files are not supported: {path}. Convert the file to .docx before upload.")
+    if not is_zipfile(path):
+        if ext == ".doc":
+            raise ValueError(f"Legacy .doc files are not supported: {path}. Convert the file to .docx before upload.")
+        raise ValueError(f"Invalid .docx file: {path} is not a readable WordprocessingML package.")
+    try:
+        with ZipFile(path) as archive:
+            if "word/document.xml" not in archive.namelist():
+                raise ValueError(f"Invalid Word document: {path} does not contain word/document.xml.")
+    except BadZipFile as exc:
+        raise ValueError(f"Invalid Word document: {path} is not a readable zip package.") from exc
+
+
+def _load_docx_document(path: Path) -> Document:
+    _require_docx_package(path)
+    return Document(path)
 
 
 def _require_openrouter_key() -> str:
@@ -115,23 +204,38 @@ def _table_to_text(table: Table) -> str:
 
 
 def _table_to_json(table: Table) -> list[dict]:
-    # Assuming the first row contains headers
-    headers = [_normalize_cell_text(cell.text) for cell in table.rows[0].cells]
     json_data: list[dict[str, str]] = []
     current_theme: dict[str, str] = {}
-    for row in table.rows[1:]:
+
+    table_rows = list(table.rows)
+    first_content_index = next(
+        (index for index, row in enumerate(table_rows) if any(_normalize_cell_text(cell.text) for cell in row.cells)),
+        None,
+    )
+    if first_content_index is None:
+        return json_data
+
+    first_cells = [_normalize_cell_text(cell.text) for cell in table_rows[first_content_index].cells]
+    if _is_section_metadata_row(first_cells) or _has_target_id(first_cells):
+        groups = _headers_to_groups(_fallback_headers(len(first_cells)))
+        data_rows = table_rows[first_content_index:]
+    else:
+        groups = _header_groups(first_cells)
+        data_rows = table_rows[first_content_index + 1 :]
+
+    for row in data_rows:
         cells = [_normalize_cell_text(cell.text) for cell in row.cells]
-        # if the row has 1 cell then it's probably a title row, skip it keep as metadata
+        # Theme rows are section metadata, not recommendations.
         # Example: "Theme: Legal & institutional reform"
-        if cells[0].lower().startswith("theme"):
+        if _is_section_metadata_row(cells):
             cell_text = cells[0]
             if ":" in cell_text:
                 key, value = cell_text.split(":", 1)
                 current_theme = {key.strip(): value.strip()}
             continue
-        if len(cells) != len(headers):
+        if not cells:
             continue
-        row_data = {headers[i]: cells[i] for i in range(len(headers))}
+        row_data = _grouped_row_to_dict(cells, groups)
         if not any(value for value in row_data.values()):
             continue
         if current_theme:
@@ -141,7 +245,7 @@ def _table_to_json(table: Table) -> list[dict]:
 
 
 def docx_tables_to_json(path: Path | str) -> list[dict[str, str]]:
-    document = Document(Path(path))
+    document = _load_docx_document(Path(path))
     rows: list[dict[str, str]] = []
     for table in document.tables:
         rows.extend(_table_to_json(table))
@@ -176,8 +280,8 @@ def read_text_file(path: Path | str) -> str:
         with p.open("rb") as handle:
             reader: Final = PdfReader(handle)
             return "\n\n".join((page.extract_text() or "") for page in reader.pages)
-    if ext == ".docx":
-        doc: Final = Document(p)
+    if ext in {".doc", ".docx"}:
+        doc: Final = _load_docx_document(p)
         return "\n\n".join(block.strip() for block in _docx_blocks_in_order(doc) if block.strip())
     if ext in {".txt", ".md"}:
         return p.read_text(encoding="utf-8")
